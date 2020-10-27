@@ -24,8 +24,8 @@ public class App {
 		// user must have AWSConnector and AmazonS3FullAccess for 
 		
 		AWSCredentials credentials = new BasicAWSCredentials(
-				"AKIA53PPZWO43J2TSX4X", 
-				"w1Yyc+1pJpJgWdsTWHLZxBS3yw1n5rzdRe9ruo3W");
+				"", 
+				"");
 		
 		// create a client connection based on credentials
 		AmazonS3 s3client = new AmazonS3Client(credentials);
