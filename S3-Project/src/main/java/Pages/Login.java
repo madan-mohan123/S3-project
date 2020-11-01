@@ -8,13 +8,18 @@ import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import java.awt.Color;
+import java.awt.Component;
+
 import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
+
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -31,8 +36,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 import java.awt.SystemColor;
 import java.awt.Toolkit;
@@ -40,13 +48,16 @@ import java.awt.Toolkit;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.border.EtchedBorder;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
+import java.io.File;
 
 import javax.swing.SwingConstants;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultListModel;
 import javax.swing.DropMode;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.BevelBorder;
@@ -56,6 +67,8 @@ import java.awt.Stroke;
 import java.awt.ComponentOrientation;
 import javax.swing.ImageIcon;
 import java.awt.Cursor;
+import java.awt.Desktop;
+import java.awt.Dimension;
 
 public class Login extends JFrame {
 
@@ -85,14 +98,21 @@ public class Login extends JFrame {
 	
 	///mode
 	int mode=1;
+	//control student view list
+	String[] str= {""};
 	
+	//grades
+	String[] grades= {""};
+	int givinggrades=10;
+	
+	int row=0;
 	
 	private JTextField textField;
 	private JTextField textField_1;
 	//static JLabel l;
 	private JButton btnNewButton;
 	
-	
+	 
 	
 	//getter
 	public String getMyClassName() {
@@ -117,28 +137,18 @@ public class Login extends JFrame {
 	}
 	//complete getter settter
 	
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Login frame = new Login();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-	
+	Login f;
 	//constructor
 	public Login() {
-//		setBackground(Color.WHITE);
 		start();
 	}
-	
+
+	public void controlframe(Login f1) {
+		f=f1;
+	}
 //This method start the application and authentication can be done here	
 public void start() {
-	
+
 	    //database connnectivity
 		try{
 			Class.forName("com.mysql.cj.jdbc.Driver");
@@ -154,9 +164,10 @@ public void start() {
 
 		//create panel for showing GUI
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setResizable(false);
 		setBounds(100, 100, 383, 578);
 		contentPane = new JPanel();
-		
+	
 		setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
 		contentPane.setForeground(new Color(255, 51, 102));
 
@@ -228,7 +239,8 @@ public void start() {
 							//it redirect to create class	
 							setMyEmail(email);
 							contentPane.setVisible(false);
-			                CreateClass();
+							//dashboard();
+							list();
 										
 									
 								}
@@ -240,8 +252,8 @@ public void start() {
 					JOptionPane.showInternalMessageDialog(contentPane,"Please check your id OR password");
 					}	
 				}
-				catch(SQLException e1) {
-					System.out.println("sql exception");
+				catch(Exception e1) {
+					//System.out.println("sql exception");
 				}	
 				
 			}
@@ -255,18 +267,23 @@ public void start() {
 		//it add button on panel
 		contentPane.add(btnLogin);                  //login button complete
 		
-		
+		try {
 		//create button signup
 		JButton btnSignup = new JButton("Sign Up");
+		
 		//code for action happen
 		btnSignup.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-			
-				
-							Signup frame = new Signup();
-							frame.setVisible(true);
+							Signup frame1 = new Signup();
+							contentPane.setVisible(false);
+							f.setVisible(false);
+							frame1.my();
+							
+							
 						}
 		});                                                 //signup action complete
+		
+		
 		
 		btnSignup.setForeground(Color.WHITE);
 		btnSignup.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -275,6 +292,10 @@ public void start() {
 		btnSignup.setBorder(null);
 		//it add button on panel
 		contentPane.add(btnSignup);                          //signup button complete
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 		
 		
 		//forget password
@@ -299,8 +320,8 @@ public void start() {
 					
 						}
 					}
-					catch(SQLException e1) {
-						System.out.println("sql excetion");
+					catch(Exception e1) {
+						//System.out.println("sql excetion");
 					} 
 				if(ch>0) {	
 					
@@ -353,10 +374,10 @@ public void start() {
 
 
 
-//this method provides create class,join class or skip  pannel
-public void CreateClass() {
+//It is called first signup of new account
+public void dashboard(String email){
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	
+	setMyEmail(email);
 	contentPane = new JPanel();
 	setBounds(100, 100, 383, 578);
 	setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
@@ -371,56 +392,8 @@ public void CreateClass() {
 	JButton btnJoinClass = new JButton("Join Class");
 	btnJoinClass.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-//			contentPane.setVisible(false);
-//			EnterClassCode();
-			try {
-			String classcode=JOptionPane.showInternalInputDialog(contentPane,"Enter Class Code");
-			if(!classcode.contentEquals("")) {
-				int check=0;
-				int var=0;
-				String sql2="select class_code from classinfo where email='"+ getMyEmail() +"'";
-				ResultSet rs2=st.executeQuery(sql2);
-				while(rs2.next()) {
-					//It eliminate duplicacy means if you join class already then you didn't join again
-					String code=rs2.getString(1);
-					if(code.contentEquals(classcode)) {
-					var=1;
-					}
-				}
-				if(var==1) {
-					//message if you already join class
-					JOptionPane.showMessageDialog(contentPane, "You have already joined this class");
-				}
-				else{
-						
-			String sql1="select class_name from classinfo where class_code='"+ classcode +"'";
-			ResultSet rs=st.executeQuery(sql1);
-		     String classname="";
-		     
-			while(rs.next()) {
-				check++;
-				 classname=rs.getString(1);
-				 String sql="insert into classinfo(CLASS_CODE,CLASS_CREATE,EMAIL,CLASS_NAME) values('"+ classcode +"','No','"+ getMyEmail() +"','"+ classname +"')";
-				 
-				 st.executeUpdate(sql);
-				 setMyClassName(classname);
+			joinClass();
 
-					list();
-					}
-			if(check==0) {
-				//message if class code is invalid
-				JOptionPane.showMessageDialog(contentPane, "Wrong class code");
-				
-			}
-				
-				
-			}
-			}
-			}
-			catch(Exception e1) {
-				
-				//System.out.println("rest step hi");
-			}
 		}
 	});
 	btnJoinClass.setBackground(Color.BLACK);
@@ -434,48 +407,8 @@ public void CreateClass() {
 	JButton btnCreateClass = new JButton("Create Class");
 	btnCreateClass.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			try {
-			         String codeforclass = JOptionPane.showInternalInputDialog(contentPane,"Enter Class code ! it must be globally unique");
-					 
-					 if(!codeforclass.contentEquals("")) {
-					     int classcodeexist=0;					 
-						    String sql1="select class_code from classinfo where class_code='"+codeforclass+"'";
-						    
-						    ResultSet rs=st.executeQuery(sql1);
-						    while(rs.next()) {
-						    classcodeexist++;
-						    }	
-						 if(classcodeexist==0) {
-							
-							String classname=JOptionPane.showInternalInputDialog(contentPane,"Enter Class Name");
-							
-							if(classname.contentEquals("")) {
-								 JOptionPane.showMessageDialog(contentPane, "classname cann't be empty");
-							 }
-							else {
-								setMyClassCode(codeforclass);
-							     String classcode=getMyClassCode();
-								 String sql="insert into classinfo(CLASS_CODE,CLASS_CREATE,EMAIL,CLASS_NAME) values('"+ classcode +"','yes','"+ getMyEmail() +"','"+ classname +"')";
-								 st.executeUpdate(sql);
+			createClassByTeacher();
 
-								 contentPane.setVisible(false);
-									list();
-								
-							}
-					 }
-						 else {
-							 JOptionPane.showMessageDialog(contentPane, "This code exist in database. So,try another code");
-					 }
-					 }
-					 else {
-						 JOptionPane.showMessageDialog(contentPane, "class code cann't be empty");
-					 
-					 
-			}
-			}
-							catch(Exception e1) {
-								//System.out.println("rest step hi");
-							}
 					 }
 			
 	});
@@ -486,19 +419,19 @@ public void CreateClass() {
 	contentPane.add(btnCreateClass);                             //button create complete
 	
 	//button skip(it is used by teacher and student if both are not interseted to create or join the class at present)
-	JButton btnSkip = new JButton("Skip");
-	btnSkip.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			contentPane.setVisible(false);
-			list();
-			
-		}
-	});
-	btnSkip.setFont(new Font("Tahoma", Font.PLAIN, 14));
-	btnSkip.setForeground(Color.WHITE);
-	btnSkip.setBackground(Color.BLACK);
-	btnSkip.setBounds(90, 333, 191, 32);
-	contentPane.add(btnSkip);                                  //button skip complete
+//	JButton btnSkip = new JButton("Skip");
+//	btnSkip.addActionListener(new ActionListener() {
+//		public void actionPerformed(ActionEvent e) {
+//			contentPane.setVisible(false);
+//			list();
+//			
+//		}
+//	});
+//	btnSkip.setFont(new Font("Tahoma", Font.PLAIN, 14));
+//	btnSkip.setForeground(Color.WHITE);
+//	btnSkip.setBackground(Color.BLACK);
+//	btnSkip.setBounds(90, 333, 191, 32);
+//	contentPane.add(btnSkip);                                  //button skip complete
 	
 	JButton btnhome = new JButton("Log out");
 	btnhome.addActionListener(new ActionListener() {
@@ -515,7 +448,109 @@ public void CreateClass() {
 	contentPane.add(btnhome);
 }
 
-int controlpaint=1;
+
+//it is used by student to join the class by entering the valid class code
+public void joinClass() {
+	try {
+		String classcode=JOptionPane.showInternalInputDialog(contentPane,"Enter Class Code");
+		if(!classcode.contentEquals("")) {
+			int check=0;
+			int var=0;
+			String sql2="select class_code from classinfo where email='"+ getMyEmail() +"'";
+			ResultSet rs2=st.executeQuery(sql2);
+			while(rs2.next()) {
+				//It eliminate duplicacy means if you join class already then you didn't join again
+				String code=rs2.getString(1);
+				if(code.contentEquals(classcode)) {
+				var=1;
+				}
+			}
+			if(var==1) {
+				//message if you already join class
+				JOptionPane.showMessageDialog(contentPane, "You have already joined this class");
+			}
+			else{
+					
+		String sql1="select class_name from classinfo where class_code='"+ classcode +"'";
+		ResultSet rs=st.executeQuery(sql1);
+	     String classname="";
+	     
+		while(rs.next()) {
+			check++;
+			 classname=rs.getString(1);
+			 String sql="insert into classinfo(CLASS_CODE,CLASS_CREATE,EMAIL,CLASS_NAME) values('"+ classcode +"','No','"+ getMyEmail() +"','"+ classname +"')";
+			 
+			 st.executeUpdate(sql);
+			 setMyClassName(classname);
+
+				list();
+				}
+		if(check==0) {
+			//message if class code is invalid
+			JOptionPane.showMessageDialog(contentPane, "Wrong class code");
+			
+		}
+			
+			
+		}
+		}
+		}
+		catch(Exception e1) {
+			
+			//System.out.println("rest step hi");
+		}	
+}
+
+
+//This function create the class by the teacher
+public void createClassByTeacher() {
+	try {
+        String codeforclass = JOptionPane.showInternalInputDialog(contentPane,"Enter Class code ! it must be globally unique");
+		 
+		 if(!codeforclass.contentEquals("")) {
+		     int classcodeexist=0;					 
+			    String sql1="select class_code from classinfo where class_code='"+codeforclass+"'";
+			    
+			    ResultSet rs=st.executeQuery(sql1);
+			    while(rs.next()) {
+			    classcodeexist++;
+			    }	
+			 if(classcodeexist==0) {
+				
+				String classname=JOptionPane.showInternalInputDialog(contentPane,"Enter Class Name");
+				
+				if(classname.contentEquals("")) {
+					 JOptionPane.showMessageDialog(contentPane, "classname cann't be empty");
+				 }
+				else {
+					setMyClassCode(codeforclass);
+				     String classcode=getMyClassCode();
+					 String sql="insert into classinfo(CLASS_CODE,CLASS_CREATE,EMAIL,CLASS_NAME) values('"+ classcode +"','Yes','"+ getMyEmail() +"','"+ classname +"')";
+					 st.executeUpdate(sql);
+
+					 contentPane.setVisible(false);
+						list();
+					
+				}
+		 }
+			 else {
+				 JOptionPane.showMessageDialog(contentPane, "This code exist in database. So,try another code");
+		 }
+		 }
+		 else {
+			 JOptionPane.showMessageDialog(contentPane, "class code cann't be empty");
+		 
+		 
+}
+}
+				catch(Exception e1) {
+					//System.out.println("rest step hi");
+				}
+}
+
+
+//to draw the line
+int controlpaint=0;
 public void paint(Graphics gp) {
 	super.paint(gp);
 	Graphics2D graphics=(Graphics2D) gp;
@@ -526,17 +561,25 @@ public void paint(Graphics gp) {
 	Stroke s=new BasicStroke(3f);
 	
 	graphics.setStroke(s);
-	if(controlpaint>1) {
+	if(controlpaint==1 || controlpaint==3) {
 	Line2D line=new Line2D.Float(0.0f,66.00f,383.00f,66.00f);
 	graphics.draw(line);
 	}
-	controlpaint++;
+	if(controlpaint==2) {
+		Line2D line=new Line2D.Float(0.0f,515.00f,383.00f,515.00f);
+		graphics.draw(line);
+		}
+	//controlpaint++;
 	
 	
 }
 
-//This method provides class list on panel
+//This method provides class list on panel for both student and teacher
 public void list() {
+	
+
+	
+	 int check=0;
 	//variable to control arrange of frames
 	j=50;
 	contentPane = new JPanel();
@@ -544,6 +587,23 @@ public void list() {
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	setBounds(100, 100, 383, 578);
 	contentPane.setForeground(Color.RED);
+	 try {
+		    String sql="select class_code from classinfo where email='"+getMyEmail()+"'";
+		    ResultSet rs=st.executeQuery(sql);
+		    while(rs.next()) {
+		    	check=1;	
+		    }
+		    if(check==0) {
+		    	contentPane.setVisible(false);
+		    	dashboard(getMyEmail());
+		    }
+		    }
+		    catch(Exception e) {
+		    System.out.println("i ma breakable");	
+		    }
+	
+	if(check!=0) {
+	
 	//mode
     if(mode==1) {
 	contentPane.setBackground(new Color(102, 102, 153));
@@ -557,7 +617,7 @@ public void list() {
 	clcreate="Student Portal";
 	
     repaint();
-	
+	controlpaint=1;
 	
 	
 	try {
@@ -605,30 +665,61 @@ public void list() {
     menu.setBorder(null);
 	
     //Create item for menu like Join, Create, Profile
+    if(classcreate.equals("No")) {
 	JMenuItem menu1=new JMenuItem("Join");
 	//action for join
 	menu1.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-//			System.out.println("hi");
+			joinClass();
 		}
 	});
 	menu1.setIconTextGap(8);
-//	menu1.setIcon(new ImageIcon("D:\\Downloads\\pic\\amazone1.jpg"));
+
 	menu1.setForeground(Color.WHITE);
-	menu1.setBackground(new Color(95, 158, 160));    
+	menu1.setBackground(new Color(100, 149, 237)); 
+	menu.add(menu1);
+	
+	JMenuItem menu4=new JMenuItem("Remove");
+	//Action for Create
+	menu4.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			remove("No");
+		}
+	});
+	menu4.setIconTextGap(8);
+//	menu2.setIcon(new ImageIcon("D:\\Downloads\\pic\\amazone1.jpg"));
+	menu4.setForeground(Color.WHITE);
+	menu4.setBackground(new Color(100, 149, 237));
+	menu.add(menu4);
+    }
 	
 	//create -menu2
+	if(classcreate.equals("Yes")) {
 	JMenuItem menu2=new JMenuItem("Create");
 	//Action for Create
 	menu2.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-//			System.out.println("hi2");
+			createClassByTeacher();
 		}
 	});
 	menu2.setIconTextGap(8);
-//	menu2.setIcon(new ImageIcon("D:\\Downloads\\pic\\amazone1.jpg"));
 	menu2.setForeground(Color.WHITE);
 	menu2.setBackground(new Color(100, 149, 237));
+	menu.add(menu2);
+	
+	JMenuItem menu3=new JMenuItem("Remove");
+	//Action for Create
+	menu3.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			remove("Yes");
+		}
+	});
+	menu3.setIconTextGap(8);
+
+	menu3.setForeground(Color.WHITE);
+	menu3.setBackground(new Color(100, 149, 237));
+	menu.add(menu3);
+	}
 	
 	//Profile
 	JMenuItem menu3=new JMenuItem("Profile");
@@ -641,7 +732,7 @@ public void list() {
 	});
 	menu3.setIconTextGap(8);
 //	menu3.setIcon(new ImageIcon("D:\\Downloads\\pic\\amazone1.jpg"));
-	menu3.setBackground(new Color(173, 216, 230));
+	menu3.setBackground(new Color(100, 149, 237));
 	menu3.setForeground(Color.WHITE);
 	
 	
@@ -668,7 +759,7 @@ public void list() {
 	//Action
 	mnLogout.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			
+			controlpaint=4;
 			contentPane.setVisible(false);
 			start();
 			
@@ -686,8 +777,8 @@ public void list() {
 	menuBar.add(mnLogout);
 	
 	//Add menu1,2,3 to Menu
-	menu.add(menu1);
-	menu.add(menu2);
+	
+	
 	menu.add(menu3);
 	
 	//end menubar
@@ -702,25 +793,25 @@ public void list() {
 	contentPane.add(classname);
 	
 	
-	JButton btnBack = new JButton("Back");
-	btnBack.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			contentPane.setVisible(false);	
-			j=40;
-		CreateClass();
-		
-			
-		}
-	});
-	btnBack.setFont(new Font("Tahoma", Font.PLAIN, 12));
-	btnBack.setForeground(new Color(255, 255, 255));
-	btnBack.setBackground(new Color(0, 0, 0));
-	btnBack.setBounds(10, 540, 85, 21);
-	contentPane.add(btnBack);
+//	JButton btnBack = new JButton("Back");
+//	btnBack.addActionListener(new ActionListener() {
+//		public void actionPerformed(ActionEvent e) {
+//			contentPane.setVisible(false);	
+//			j=40;
+//		dashboard();
+//		
+//			
+//		}
+//	});
+//	btnBack.setFont(new Font("Tahoma", Font.PLAIN, 12));
+//	btnBack.setForeground(new Color(255, 255, 255));
+//	btnBack.setBackground(new Color(0, 0, 0));
+//	btnBack.setBounds(10, 540, 85, 21);
+//	contentPane.add(btnBack);
 	
 	
 
-
+	}
 	
 }
 
@@ -728,6 +819,7 @@ public void list() {
 public void classList() {
 	JInternalFrame internalFrame;		
 	internalFrame = new JInternalFrame(getMyClassCode());
+	
 
 	if(mode==1) {
 	internalFrame.getContentPane().setBackground(Color.DARK_GRAY);
@@ -777,14 +869,14 @@ public void classList() {
 
 
 
-//This show Assignment List
+//This show Assignment List coreesepond to each class
 public void assignList(JButton bt1) {
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	setBounds(100, 100, 383, 578);
 	contentPane = new JPanel();
 	setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
 	contentPane.setForeground(Color.RED);
-//	contentPane.setBackground(new Color(138, 43, 226));
+
 	if(mode==1) {
 		contentPane.setBackground(new Color(102, 102, 153));	
 	}
@@ -798,21 +890,83 @@ public void assignList(JButton bt1) {
 	contentPane.setLayout(null);
 	
 	String bto=bt1.getText();
-	//System.out.println(bto+"  hi");
+    
+	if(classcreate.equals("Yes")) {
+		
+		controlpaint=3;
+		repaint();
+		
+		
+		try {
+			String sql="select count(class_create) from classinfo where class_code='"+bt1.getText()+"' and class_create='No' " ;
+			ResultSet rs=st.executeQuery(sql);
+			String count="";
+			
+			while(rs.next()) {
+				 count=rs.getString(1);	
+			}
+			
+			JLabel scount=new JLabel("Students: "+count);
+			scount.setForeground(Color.GREEN);
+			scount.setFont(new Font("Tahoma", Font.BOLD, 15));
+			scount.setVisible(true);
+			contentPane.setLayout(null);
+			scount.setBounds(10, 7, 120,25);
+			scount.setBackground(Color.WHITE);
+			contentPane.add(scount);
+			
+			
+			
+		}
+		catch(Exception e1) {
+			System.out.println("rest step hi");
+		}
+		
+		
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.setBounds(310, 11, 45, 20);
+		contentPane.add(menuBar);
+
+		menuBar.setBorder(null);
+		menuBar.setBackground(SystemColor.activeCaption);	
+		JMenuItem view = new JMenuItem("View");
+		
+		    //Action
+		view.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					
+					contentPane.setVisible(false);
+                      controlpaint=4;
+					//settings();
+					studentlist(bt1);
+					
+				}
+			});
+		view.setForeground(Color.WHITE);
+		view.setBackground(new Color(0, 128, 128));
+		view.setBorder(null);
+		menuBar.add(view);
+		
+	}
+	
 	JInternalFrame internalFrame;		
 
-	int control=38;
+	int control=50;
+	
 	
 try {	
-		String sql="select assignment_name,due_date from assignmentlist where class_code='"+bto+"'" ;
+		String sql="select assignment_name,due_date,assignment_id from assignmentlist where class_code='"+bto+"'" ;
 		ResultSet rs=st.executeQuery(sql);
-	
 		String assign="";
 		String duedate="";
+		String assignmentid="";
+		
 		
 		while(rs.next()) {
 			    assign=rs.getString(1);
 			    duedate=rs.getString(2);
+			    assignmentid=rs.getString(3);
+			    
 			    internalFrame = new JInternalFrame(bto);
 			    if(mode==1) {
 				   internalFrame.getContentPane().setBackground(Color.DARK_GRAY);
@@ -845,44 +999,35 @@ try {
 				control+=100;
 				
 				
-				//Action on clicked on particular assignment
-				internalFrame.getContentPane().addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						//System.out.println("hi");
-						contentPane.setVisible(false);
-						setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-						setBounds(100, 100, 383, 578);
-						contentPane = new JPanel();
-						setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
-						contentPane.setForeground(Color.RED);
-//						contentPane.setBackground(new Color(138, 43, 226));
-						if(mode==1) {
-							contentPane.setBackground(new Color(102, 102, 153));	
-						}
-						else {
-						contentPane.setBackground(new Color(0, 128, 128));
-						}
-						contentPane.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Submittion List", TitledBorder.CENTER, TitledBorder.TOP, null, Color.ORANGE));
-						setContentPane(contentPane);
-						contentPane.setLayout(null);
+				JButton asname=new JButton(assignmentid);
+				if(classcreate.equals("Yes")) {
+				
+				asname.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+                        contentPane.setVisible(false);
 						
-						
-						
-						JButton btnCancel = new JButton("Back");
-						btnCancel.addActionListener(new ActionListener() {
-							public void actionPerformed(ActionEvent e) {
-								contentPane.setVisible(false);
-								list();
-							}
-						});
-						btnCancel.setBackground(Color.BLACK);
-						btnCancel.setForeground(Color.WHITE);
-						btnCancel.setFont(new Font("Tahoma", Font.BOLD, 16));
-						btnCancel.setBounds(26, 490, 100, 34);
-						contentPane.add(btnCancel);	
+						submit(asname,bt1);
 					}
-				});
+					});
+				}
+				else {
+					asname.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+	                        contentPane.setVisible(false);
+							
+							studentsubmit(asname,bt1);
+						}
+						});
+				}
+					
+				
+				asname.setToolTipText("view submittions\r\n");
+				asname.setForeground(Color.WHITE);
+				asname.setBackground(Color.BLACK);
+				asname.setBounds(217, 39, 85, 21);
+				internalFrame.add(asname);
+				
+
 			
 		}
 		
@@ -915,8 +1060,7 @@ try {
 	   JButton btnMore = new JButton(" + ");
 	   btnMore.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-       // CreateAssignment ca=new CreateAssignment();
-         //    ca.setVisible(true);
+     
 			contentPane.setVisible(false);
 			CreateAssignment(bto);
 		}	
@@ -934,10 +1078,521 @@ try {
 
 }//Complete Assignment list Method
 
+//this function tell the student how many student in thier class and he can also remove the student
+public void studentlist(JButton classcd){
+	setBackground(Color.WHITE);
+	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	setBounds(100, 100, 383, 578);
+	contentPane = new JPanel();
+	contentPane.setToolTipText("");
+	contentPane.setBackground(Color.DARK_GRAY);
+	contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+	setContentPane(contentPane);
+	contentPane.setLayout(null);
+	
+	System.out.println(classcd.getText());
+	DefaultListModel<String> l1=new DefaultListModel<>();
+	
+	try {
+		int counts=0;
+		
+		String sql="SELECT email from classinfo where class_code='"+classcd.getText()+"' and class_create='No' ";
+		ResultSet rs=st.executeQuery(sql);
+		int ic=0;
+		while(rs.next()) {
+			counts++;	
+		}
+		
+		 str=new String[counts];
+		 //System.out.println(str[0]+" "+str[1]);
+		
+		String sql3="SELECT email from classinfo where class_code='"+classcd.getText()+"' and class_create='No' ";
+		ResultSet rs3=st.executeQuery(sql3);
+		while(rs3.next()) {
+			str[ic]=rs3.getString(1);
+			ic++;	
+			
+		}
+		for(ic=0;ic<counts;ic++) {
+		String sql1=" SELECT username from account where email='"+str[ic]+"'";
+	    ResultSet rs1=st.executeQuery(sql1);
+	    while(rs1.next()) {
+	    	l1.addElement(rs1.getString(1));
+	    	
+	    }
+		}
+		
+	}
+	catch(Exception e2) {
+		e2.printStackTrace();
+	}
+	JList<String> list = new JList<>(l1);
+
+	list.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	list.setForeground(Color.ORANGE);
+
+	list.setBounds(0, 10, 369, 490);
+	contentPane.add(list);
+	
+	JButton btnRemove = new JButton("Remove");
+	btnRemove.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		
+			String data="";
+			if(list.getSelectedIndex()!=-1) {
+				//System.out.println(list.getSelectedValue());
+				//System.out.println(list.getSelectedIndex());
+				try {
+					
+					int response=JOptionPane.showInternalConfirmDialog(contentPane, "Do you Want Remove student From Your class");
+					if(response==0) {
+					
+					String sql="DELETE from classinfo where email='"+str[list.getSelectedIndex()]+"'";
+					st.executeUpdate(sql);
+					studentlist(classcd);
+					}
+					else {
+						
+					}
+				}
+				catch(Exception e2){
+					
+				}
+				
+			}
+		}
+	});
+	btnRemove.setBounds(274, 510, 85, 21);
+	contentPane.add(btnRemove);
+	
+	JButton btnBack = new JButton("Back");
+	btnBack.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			
+			contentPane.setVisible(false);
+			assignList(classcd);
+		}
+	});
+	btnBack.setBounds(10, 510, 85, 21);
+	contentPane.add(btnBack);
+	
+	
+	
+}
 
 
+//it is used by student to upload their work or too see the see the uploaded the assignment
+public void studentsubmit(JButton assignmentid,JButton classcode){
+	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	setBounds(100, 100, 383, 578);
+	contentPane = new JPanel();
+	contentPane.setBackground(new Color(0, 128, 128));
+	contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+	setContentPane(contentPane);
+	contentPane.setLayout(null);
+	
+	controlpaint=2;
+	repaint();
+	JButton btnBack = new JButton("BACK");
+	btnBack.setBackground(new Color(128, 128, 128));
+	btnBack.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			contentPane.setVisible(false);
+			assignList(classcode);
+		}
+	});
+	btnBack.setBounds(10, 10, 85, 21);
+	contentPane.add(btnBack);
+	
+	JScrollPane scrollPane = new JScrollPane();
+	scrollPane.setBounds(361, 224, -352, -148);
+	contentPane.add(scrollPane);
+	
+	JLabel lblDescription = new JLabel(" Description ");
+	lblDescription.setForeground(new Color(0, 0, 0));
+	lblDescription.setFont(new Font("Tahoma", Font.PLAIN, 16));
+	lblDescription.setBounds(10, 41, 97, 21);
+	contentPane.add(lblDescription);
+	
+	JLabel descript = new JLabel("");
+	descript.setFont(new Font("Tahoma", Font.PLAIN, 15));
+	descript.setVerticalAlignment(SwingConstants.TOP);
+	descript.setHorizontalAlignment(SwingConstants.LEFT);
+	descript.setBounds(10, 72, 349, 162);
+	descript.setForeground(new Color(211, 211, 211));
+	contentPane.add(descript);
+	
+	
+	
+	
+	int n=Integer.parseInt(assignmentid.getText());
+	
+	//Description of assignment
+	try
+	{
+		String sql="SELECT assignment_name,file_location from assignmentlist where assignment_id='"+assignmentid.getText()+"'";
+		ResultSet rs=st.executeQuery(sql);
+		String description="";
+		String file="";
+		while(rs.next()) {
+			description=rs.getString(1);
+			file=rs.getString(2);
+			
+		}
+		descript.setText(description);
+		if(!file.equals("")) {
+			JLabel Files = new JLabel(" Files ");
+			Files.setForeground(new Color(0, 0, 0));
+			Files.setFont(new Font("Tahoma", Font.PLAIN, 16));
+			Files.setBounds(10, 268, 110, 26);
+			contentPane.add(Files);
+			
+			JLabel location = new JLabel(file);
+			location.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+				
+					try  
+					{  
+					File file = new File(Files.getText());   
+					if(!Desktop.isDesktopSupported())                            //check if Desktop is supported by Platform or not  
+					{  
+						JOptionPane.showInternalMessageDialog(contentPane, "Not supported Format");
+					 
+					}  
+					Desktop desktop = Desktop.getDesktop();  
+					if(file.exists()) {                                               //checks file exists or not  
+					desktop.open(file);                                              //opens the specified file  
+					}
+					else {
+						JOptionPane.showInternalMessageDialog(contentPane, "File not Exist");
+					}
+					}
+				
+					catch(Exception e1)  
+					{  
+					//e1.printStackTrace();  
+					}
+					
+				}
+			});
+			
+			location.setFont(new Font("Tahoma", Font.PLAIN, 15));
+			location.setForeground(new Color(211, 211, 211));
+			location.setBounds(10, 304, 227, 21);
+			contentPane.add(location);
+			
+		
+		}
+		
+	}
+	catch(Exception e) {
+		
+	}
+	int controlvar=0;
+	try {
+	    String sql1="select Email from submittionlist where assignment_id='"+n+"'";
+		//it execute sql query
+		ResultSet rs=st.executeQuery(sql1);
+	
+		String myemail="";
+		while(rs.next()) {
+			myemail=rs.getString(1);
+			if(myemail.equals(getMyEmail())){
+				controlvar=1;
+				break;
+			}
+			
+		}
+		
+		//if assignment uploaded by student
+		if(controlvar==1) {
+	   
+			try {
+				
+				String sql2="SELECT status,grades from submittionlist where assignment_id='"+n+"' and email='"+getMyEmail()+"'";
+				String gr="0/0";
+			
+				ResultSet rs1=st.executeQuery(sql2);
+				while(rs1.next()){
+					if(rs1.getString(1).contentEquals("Checked")) {
+						
+						gr=rs1.getString(2);
+					}	
+				}
+				
+		JLabel grades = new JLabel("Grades: "+gr);
+		grades.setForeground(Color.WHITE);
+		grades.setBackground(new Color(135, 206, 235));
+		grades.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		grades.setBounds(10, 503, 85, 21);
+		contentPane.add(grades);
+		
+		JLabel Status = new JLabel("Submitted");
+		Status.setForeground(Color.WHITE);
+		Status.setBackground(new Color(135, 206, 235));
+		Status.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		
+		Status.setBounds(259, 498, 66, 26);
+		contentPane.add(Status);
+		//System.out.println("hi");
+			}
+          catch(Exception e1) {
+				
+			}
+		}
+	}
+	catch(Exception e2) {
+	System.out.println(e2);	
+	}
+	
+	//if assignment not uplooaded yet
+	if(controlvar==0)
+	{
+		
+	JLabel lb = new JLabel("None");
+	lb.setBounds(117, 505, 97, 17);
+	contentPane.add(lb);
+	
+	JButton btnUpload = new JButton("Upload");
+	btnUpload.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			
+			JFileChooser j=new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+			
+			int r=j.showOpenDialog(null);
+			if(r==JFileChooser.APPROVE_OPTION) {
+			   lb.setText(j.getSelectedFile().getAbsolutePath());
+				//System.out.println(lb.getText());	
+			}
+			else {
+				lb.setText("Operation is Cancelled");
+			}
+		}
+	});
+	btnUpload.setBounds(10, 503, 85, 21);
+	contentPane.add(btnUpload);
+	
+	
+	//System.out.println(n);
+	JButton btnSubmit = new JButton("Submit");
+	btnSubmit.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
 
+			try {   
+				     //check if alredy uploaded
+				    String sql1="select Email from submittionlist where assignment_id='"+n+"'";
+					ResultSet rs=st.executeQuery(sql1);
+					int controlvar=0;
+					String myemail="";
+					while(rs.next()) {
+						myemail=rs.getString(1);
+						if(myemail.equals(getMyEmail())){
+							controlvar=1;
+							break;
+						}
+						
+					}
+					if(controlvar==1) {
+						JOptionPane.showInternalMessageDialog(contentPane, "You Have already uploaded this assignment");
+					}
+					else {
+						
+						//for \slace store in database
+						 String text=lb.getText();
+						 String text1="";
+							for(int i=0;i<text.length();i++) {
+								if(String.valueOf(text.charAt(i)).equals("\\")){
+									text1= text1 + "\\\\";
+									System.out.println(text);
+									
+								}
+								else {
+									text1 = text1 + String.valueOf(text.charAt(i));
+								}
+									
+							}
+							
+							//complete logic
+									
+			String sql="INSERT INTO submittionlist(Email,File,assignment_id) values('"+getMyEmail()+"','"+text1+"','"+n+"')";
+			st.executeUpdate(sql);
+			JOptionPane.showInternalMessageDialog(contentPane, "Successfully uploaded");
+			}
+			}
+			catch(Exception e1){
+			e1.printStackTrace();	
+			}
+		}
+	});
+	btnSubmit.setBounds(274, 503, 85, 21);
+	contentPane.add(btnSubmit);
+	}
+	
+	
+	
+}
+ 
 
+//it used by teacher to giving the grades and view assignment of students
+public void submit(JButton assignmentid,JButton classcode) {
+	
+	
+	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	setBounds(100, 100, 383, 578);
+	contentPane = new JPanel();
+	setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
+	contentPane.setForeground(Color.RED);
+
+	if(mode==1) {
+		contentPane.setBackground(new Color(102, 102, 153));	
+	}
+	else {
+	contentPane.setBackground(new Color(0, 128, 128));
+	}
+	contentPane.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Submittion List", TitledBorder.CENTER, TitledBorder.TOP, null, Color.ORANGE));
+	setContentPane(contentPane);
+	contentPane.setLayout(null);
+	
+
+	JScrollPane scrollPane = new JScrollPane();
+	scrollPane.setBorder(null);
+	scrollPane.setBounds(10, 20, 347, 470);
+	
+	contentPane.add(scrollPane);
+	
+	
+	JTable table;
+	String[][] s=new String[30][2];
+	String[] s1={"Email","Grades"};
+	
+	int n=Integer.parseInt(assignmentid.getText());
+	
+	row=0;
+	try {
+		String sql="select Email,grades from submittionlist where assignment_id='"+n+"'";
+		
+		ResultSet rs=st.executeQuery(sql);
+		
+		while(rs.next()) {
+
+			s[row][0]=rs.getString(1);              //email
+			s[row][1]=rs.getString(2);             //grades
+			//System.out.println(s[row][0]);
+			row++;
+			}
+		}
+		
+	catch(Exception e2) {
+		System.out.println(e2);
+	}
+	
+	table = new JTable(s,s1);
+	table.setFont(new Font("Tahoma", Font.BOLD, 12));
+	table.setForeground(new Color(0, 191, 255));
+	table.setBackground(Color.GRAY);
+	table.setCellSelectionEnabled(true);
+	ListSelectionModel select=table.getSelectionModel();
+	select.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	
+	scrollPane.setViewportView(table);
+	
+	
+	//Give grades
+	
+	grades=new String[row];
+ 
+	table.addMouseListener(new MouseAdapter() {
+		@Override
+		public void mouseClicked(MouseEvent e) {
+
+			//System.out.println(table.getValueAt(table.getSelectedRow(), table.getSelectedColumn()));
+
+			for(int i=0;i<row;i++) {
+				grades[i]=(String)table.getValueAt(i,1);
+				}
+		}
+	});
+	
+	
+	JButton done = new JButton("Done");
+	done.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			JOptionPane.showInternalMessageDialog(contentPane, "Click on any cell to giving these grades!");
+			for(int i=0;i<row;i++) {
+				try {
+					String sql="UPDATE submittionlist SET grades='"+grades[i]+"' , status='Checked' where assignment_id='"+assignmentid.getText()+"' and email='"+(String)table.getValueAt(i,0)+"'";
+					st.executeUpdate(sql);
+					JOptionPane.showInternalMessageDialog(contentPane, "Grades successfully uploaded");
+				}
+				catch(Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+
+		}
+	});
+	done.setBounds(274, 510, 85, 21);
+	contentPane.add(done);
+	
+	
+	//view the Assignment
+	JButton btnView = new JButton("View");
+	btnView.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			try {
+			    String subemail=(String)table.getValueAt(table.getSelectedRow(),0);
+				String sql="SELECT file from submittionlist where assignment_id='"+assignmentid.getText()+"' and email='"+subemail+"'";
+				ResultSet rs=st.executeQuery(sql);
+				while(rs.next()) {
+					int pane=JOptionPane.showInternalConfirmDialog(contentPane, "Do you want open it?");
+					if(pane==0) {
+						try  
+						{  
+						File file = new File(rs.getString(1));   
+						if(!Desktop.isDesktopSupported())                                                //check if Desktop is supported by Platform or not  
+						{  
+							JOptionPane.showInternalMessageDialog(contentPane, "Not supported Format");
+						 
+						}  
+						Desktop desktop = Desktop.getDesktop();  
+						if(file.exists()) {                                                            //checks file exists or not  
+						desktop.open(file);                                                           //opens the specified file  
+						}
+						else {
+						JOptionPane.showInternalMessageDialog(contentPane, "File not Exist");
+						}
+						}  
+						catch(Exception e1)  
+						{  
+						
+						}
+					}
+					//System.out.println(rs.getString(1));
+				}
+			}
+			catch(Exception e1) {
+				
+			}
+			
+		}
+	});
+	btnView.setBounds(141, 510, 85, 21);
+	contentPane.add(btnView);
+	
+	JButton btnCancel = new JButton("Back");
+	btnCancel.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			contentPane.setVisible(false);
+			assignList(classcode);
+		}
+	});
+	btnCancel.setBackground(Color.BLACK);
+	btnCancel.setForeground(Color.WHITE);
+	btnCancel.setFont(new Font("Tahoma", Font.BOLD, 16));
+	btnCancel.setBounds(10, 505, 100, 28);
+	contentPane.add(btnCancel);	
+}
 
 //This method shows profile
 public void profile() {
@@ -1084,7 +1739,7 @@ public void profile() {
 	contentPane.add(btnBack);
 }
 
-
+//This method create the assignment to upload the assignment (Student)
 public void CreateAssignment(String class_code) {
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	setBounds(100, 100, 383, 578);
@@ -1118,21 +1773,17 @@ public void CreateAssignment(String class_code) {
 	contentPane.add(textField);
 	textField.setColumns(10);
 	
-	
-	
-	
-	
-	
 	 //dihkhdhk
 	
-	JLabel	lb=new JLabel("none file selected");
+	JLabel	lb=new JLabel("None file selected");
 	lb.setBackground(new Color(0, 0, 0));
 	lb.setFont(new Font("Tahoma", Font.PLAIN, 11));
 	lb.setForeground(new Color(255, 255, 255));
-	lb.setBounds(160, 313, 210, 19);
+	lb.setBounds(160, 313, 100, 19);
 	contentPane.add(lb);
 	
-	btnNewButton = new JButton("choose file");
+
+	btnNewButton = new JButton("Choose file");
 	btnNewButton.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {			
 		
@@ -1140,11 +1791,13 @@ public void CreateAssignment(String class_code) {
 		
 			int r=j.showOpenDialog(null);
 			if(r==JFileChooser.APPROVE_OPTION) {
-				
 				lb.setText(j.getSelectedFile().getAbsolutePath());
+				//System.out.println(lb.getText());
+				
+				
 			}
 			else {
-				lb.setText("Operation is Cancelled");
+				lb.setText("None");
 			}
 		}
 	});
@@ -1165,10 +1818,29 @@ JButton btnDone = new JButton("Done");
 				}
 				
 				if(textField_1.getText().equals("") || textField.getText().equals("")) {
-					JOptionPane.showMessageDialog(contentPane, "None filed cannot e Emptied");
+					JOptionPane.showMessageDialog(contentPane, "None filed cannot be Emptied");
 				}
 				else {
-				String sql1="insert into assignmentlist(CLASS_NAME,CLASS_CODE,ASSIGNMENT_NAME,DUE_DATE) values('"+ class_name+"','"+  class_code +"','"+textField.getText()+"','"+textField_1.getText()+"')";
+					
+					//for \slace store in database
+					 String text=lb.getText();
+					 String text1="";
+						for(int i=0;i<text.length();i++) {
+							if(String.valueOf(text.charAt(i)).equals("\\")){
+								text1= text1 + "\\\\";
+								System.out.println(text);
+								
+							}
+							else {
+								text1 = text1 + String.valueOf(text.charAt(i));
+							}
+								
+						}
+						
+						//complete logic
+
+					
+				String sql1="insert into assignmentlist(CLASS_NAME,CLASS_CODE,ASSIGNMENT_NAME,DUE_DATE,FILE_LOCATION) values('"+ class_name+"','"+  class_code +"','"+textField.getText()+"','"+textField_1.getText()+"','"+text1+"')";
 				st.executeUpdate(sql1);
 				
 				JOptionPane.showInternalMessageDialog(contentPane,"Successfully assignment uploaded!");
@@ -1177,7 +1849,7 @@ JButton btnDone = new JButton("Done");
 			}
 			}
 			catch(Exception e1) {
-				System.out.println(e1);
+				//System.out.println(e1);
 			}
 			
 
@@ -1205,6 +1877,36 @@ JButton btnDone = new JButton("Done");
 	btnCancel.setBounds(26, 445, 101, 34);
 	contentPane.add(btnCancel);
 	
+	
+	
+	JButton btnNewButton_1;
+	btnNewButton_1 = new JButton("View");
+	btnNewButton_1.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			
+			
+			try  
+			{  
+			File file = new File(lb.getText());   
+			if(!Desktop.isDesktopSupported())                    //check if Desktop is supported by Platform or not  
+			{  
+				JOptionPane.showInternalMessageDialog(contentPane, "Not supported Format");
+			 
+			}  
+			Desktop desktop = Desktop.getDesktop();  
+			if(file.exists())                                          //checks file exists or not  
+			desktop.open(file);                                       //opens the specified file  
+			}  
+			catch(Exception e1)  
+			{  
+			//e1.printStackTrace();  
+			}
+		}
+	});
+	btnNewButton_1.setBounds(34, 347, 110, 21);
+	contentPane.add(btnNewButton_1);
+	
+//	JButton btnNewButton_1;
 //	btnNewButton_1 = new JButton("save");
 //	btnNewButton_1.addActionListener(new ActionListener() {
 //		public void actionPerformed(ActionEvent e) {
@@ -1223,17 +1925,14 @@ JButton btnDone = new JButton("Done");
 //	contentPane.add(btnNewButton_1);
 		
 }
+
+//it used to change the setting like theme of application
 public void settings() {
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	setBounds(100, 100, 383, 578);
 	contentPane = new JPanel();
 	contentPane.setForeground(Color.GRAY);
-	if(mode==1) {
-		contentPane.setBackground(Color.DARK_GRAY);	
-	}
-	else {
-	contentPane.setBackground(new Color(0, 128, 128));
-	}
+	
 	contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 	setContentPane(contentPane);
 	contentPane.setLayout(null);
@@ -1250,7 +1949,7 @@ public void settings() {
 	
 	JRadioButton rdbtnDarkMode = new JRadioButton("Dark Mode");
 	rdbtnDarkMode.setForeground(Color.LIGHT_GRAY);
-	rdbtnDarkMode.setBackground(Color.DARK_GRAY);
+	
 	rdbtnDarkMode.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	rdbtnDarkMode.setBounds(20, 72, 115, 21);
 	bg.add(rdbtnDarkMode);
@@ -1260,7 +1959,7 @@ public void settings() {
 	
 	JRadioButton rdbtnNormalMode = new JRadioButton("Normal Mode");
 	rdbtnNormalMode.setForeground(Color.LIGHT_GRAY);
-	rdbtnNormalMode.setBackground(Color.DARK_GRAY);
+	
 	rdbtnNormalMode.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	rdbtnNormalMode.setBounds(158, 72, 140, 21);
 	bg.add(rdbtnNormalMode);
@@ -1285,7 +1984,7 @@ public void settings() {
 	
 	JRadioButton rdbtnAllow = new JRadioButton("Allow");
 	rdbtnAllow.setForeground(Color.LIGHT_GRAY);
-	rdbtnAllow.setBackground(Color.DARK_GRAY);
+	
 	rdbtnAllow.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	rdbtnAllow.setBounds(20, 156, 105, 21);
 	contentPane.add(rdbtnAllow);
@@ -1293,7 +1992,7 @@ public void settings() {
 	
 	JRadioButton rdbtnNotAllow = new JRadioButton("Not Allow");
 	rdbtnNotAllow.setForeground(Color.LIGHT_GRAY);
-	rdbtnNotAllow.setBackground(Color.DARK_GRAY);
+
 	rdbtnNotAllow.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	rdbtnNotAllow.setBounds(158, 156, 105, 21);
 	contentPane.add(rdbtnNotAllow);
@@ -1307,8 +2006,8 @@ public void settings() {
 	contentPane.add(lblRemoveAccount);
 	
 	JRadioButton rdbtnDoYouWant = new JRadioButton("Do You Want to ramove Account?");
-	rdbtnDoYouWant.setForeground(new Color(255, 69, 0));
-	rdbtnDoYouWant.setBackground(Color.DARK_GRAY);
+	rdbtnDoYouWant.setForeground(Color.ORANGE);
+	
 	rdbtnDoYouWant.setFont(new Font("Tahoma", Font.PLAIN, 12));
 	rdbtnDoYouWant.setBounds(30, 231, 268, 21);
 	contentPane.add(rdbtnDoYouWant);
@@ -1349,7 +2048,91 @@ public void settings() {
 	btnCancel.setBounds(138, 414, 85, 21);
 	contentPane.add(btnCancel);
 	
+	if(mode==1) {
+		contentPane.setBackground(Color.DARK_GRAY);	
+		rdbtnDarkMode.setBackground(Color.DARK_GRAY);
+		rdbtnNormalMode.setBackground(Color.DARK_GRAY);
+		rdbtnAllow.setBackground(Color.DARK_GRAY);
+		rdbtnNotAllow.setBackground(Color.DARK_GRAY);
+		rdbtnDoYouWant.setBackground(Color.DARK_GRAY);
+	}
+	else {
+	contentPane.setBackground(new Color(0, 128, 128));
+	rdbtnDarkMode.setBackground(new Color(0, 128, 128));
+	rdbtnNormalMode.setBackground(new Color(0, 128, 128));
+	rdbtnAllow.setBackground(new Color(0, 128, 128));
+	rdbtnNotAllow.setBackground(new Color(0, 128, 128));
+	rdbtnDoYouWant.setBackground(new Color(0, 128, 128));
+	}
+	
 }
+
+
+//it used by student or by teacher to delete the class
+public void remove(String s) {
+	try {
+		if(s.contentEquals("Yes")) {
+			String classcode=JOptionPane.showInternalInputDialog(contentPane, "Enter Code of Class");
+			if(!classcode.contentEquals("")) {
+				
+				    int mycheck=0;					 
+				    String sql1="select class_code from classinfo where email='"+getMyEmail()+"'";
+				    
+				    ResultSet rs1=st.executeQuery(sql1);
+				    
+				    while(rs1.next()) {
+				    	if(rs1.getString(1).equals(classcode))
+				    	   mycheck++;
+				    }
+				    if(mycheck>0) {
+				    	String sql="delete from classinfo where class_code='"+classcode+"'";
+						st.executeUpdate(sql);
+						JOptionPane.showInternalMessageDialog(contentPane, "Class successfully deleted : " + classcode);
+						list();	
+				    }
+				    else {
+				    	JOptionPane.showInternalMessageDialog(contentPane, "Wrong class code");
+				    }
+				
+			}
+			else {
+				JOptionPane.showInternalMessageDialog(contentPane, "class code cannot be empty");
+			}
+	
+		}
+		else {
+			String classcode=JOptionPane.showInternalInputDialog(contentPane, "Enter Code of Class");
+			if(!classcode.contentEquals("")) {
+				 int mycheck=0;					 
+				    String sql1="select class_code from classinfo where email='"+getMyEmail()+"'";
+				    
+				    ResultSet rs1=st.executeQuery(sql1);
+				    while(rs1.next()) {
+				    	if(rs1.getString(1).equals(classcode))
+				    	mycheck++;
+				    }
+				    if(mycheck>0) {
+				
+			String sql="delete from classinfo where class_code='"+classcode+"' and email='"+getMyEmail()+"'";
+			st.executeUpdate(sql);
+			JOptionPane.showInternalMessageDialog(contentPane, "Class successfully deleted : " + classcode);
+			list();
+				    }
+				    else {
+				    	JOptionPane.showInternalMessageDialog(contentPane, "Wrong class code");
+				    }
+			}
+			else {
+				JOptionPane.showInternalMessageDialog(contentPane, "class code cannot be empty");
+			}
+
+		}
+	}
+	catch(Exception e){
+		//System.out.println(e);
+	}
+}
+
 }
 
 

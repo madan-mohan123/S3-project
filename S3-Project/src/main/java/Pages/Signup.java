@@ -32,7 +32,7 @@ import javax.swing.border.EtchedBorder;
 
 
 
-public class Signup extends JFrame {
+public class Signup  {
 
 	private JPanel contentPane;
 	private JTextField textFieldName;
@@ -46,7 +46,7 @@ public class Signup extends JFrame {
 //		EventQueue.invokeLater(new Runnable() {
 //			public void run() {
 //				try {
-//					Signup frame = new Signup();
+//					 frame = new Signup();
 //					frame.setVisible(true);
 //				} catch (Exception e) {
 //					e.printStackTrace();
@@ -58,8 +58,13 @@ public class Signup extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+	public JFrame f;
 	public Signup() {
-		
+		 f=new JFrame();
+		 f.setVisible(true);
+	}
+	public void my() {
+
 		 try {
 				Class.forName("com.mysql.cj.jdbc.Driver");
 				
@@ -75,14 +80,15 @@ public class Signup extends JFrame {
 			}
 		
 		
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 383, 578);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f.setBounds(100, 100, 383, 578);
+		f.setResizable(false);
 		contentPane = new JPanel();
 		contentPane.setForeground(Color.RED);
 		contentPane.setBackground(Color.DARK_GRAY);
-		setIconImage(Toolkit.getDefaultToolkit().getImage("E:\\downloads\\pic\\maths.png"));
+		f.setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
 		contentPane.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Create Account", TitledBorder.CENTER, TitledBorder.TOP, null, Color.ORANGE));
-		setContentPane(contentPane);
+		f.setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
 		//create username labels
@@ -97,6 +103,7 @@ public class Signup extends JFrame {
 		textFieldName = new JTextField();
 		textFieldName.setBounds(134, 151, 202, 29);
 		contentPane.add(textFieldName);
+		textFieldName.setBorder(null);
 		textFieldName.setColumns(10);
 		
 		
@@ -112,6 +119,7 @@ public class Signup extends JFrame {
 		textFieldEmail = new JTextField();
 		textFieldEmail .setBounds(134, 205, 202, 29);
 		contentPane.add(textFieldEmail );
+		textFieldEmail.setBorder(null);
 		textFieldEmail .setColumns(10);
 		
 		//create  Password label
@@ -138,9 +146,13 @@ public class Signup extends JFrame {
 				}
 				
 				
-				else {	
-					
-				 try {
+				else {
+					 //Valid Email
+					 String validId=textFieldEmail.getText();
+					 int length=validId.length();
+					 if(length>10 && (validId.substring(length-10, length).equals("@gmail.com")) || (validId.substring(length-10, length).equals("@yahoo.com"))) {
+				 try {     
+					 
 					
 							//sql query for checking the email,password info in database
 							String sql="select Email from account where email='"+ textFieldEmail.getText() +"'" ;
@@ -159,16 +171,23 @@ public class Signup extends JFrame {
 						String sql1="insert into account(USERNAME,EMAIL,PASSWORD) values('"+ textFieldName.getText() +"','"+ textFieldEmail.getText() +"','"+textFieldPassword.getText()+"')";
 						st.executeUpdate(sql1);
 						JOptionPane.showInternalMessageDialog(contentPane,"Successfully created!");
-						Login frame = new Login();
+						Login frame1 = new Login();
+						contentPane.setVisible(false);
+					    f.setVisible(false);
+						frame1.setVisible(true);
+					    frame1.controlframe(frame1);
+					    frame1.dashboard(textFieldEmail.getText());
 						
-						
-						frame.setVisible(true);
 							
 					}
 				 }
 					catch(SQLException e1) {
 						System.out.println("rest step");
 					}
+					 }
+					 else {
+						 JOptionPane.showInternalMessageDialog(contentPane,"Invalid Email"); 
+					 }
 
 			}
 		
@@ -179,14 +198,38 @@ public class Signup extends JFrame {
 		btnClickHere.setForeground(Color.BLACK);
 		btnClickHere.setFont(new Font("Tahoma", Font.BOLD, 14));
 		btnClickHere.setBackground(Color.ORANGE);
-		btnClickHere.setBounds(134, 417, 116, 36);
+		btnClickHere.setBounds(212, 388, 116, 36);
 		contentPane.setBorder(null);
 		contentPane.add(btnClickHere);
+		btnClickHere.setBorder(null);
+		//f.add(contentPane);
 		
-		
+		JButton Back = new JButton("Back");
+		Back.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			
+				
+				Login frame1 = new Login();
+				contentPane.setVisible(false);
+			    f.setVisible(false);
+				frame1.setVisible(true);
+			    frame1.controlframe(frame1);
+			}
+		});
+			
+		Back.setForeground(Color.BLACK);
+		Back.setFont(new Font("Tahoma", Font.BOLD, 14));
+		Back.setBackground(Color.ORANGE);
+		Back.setBounds(33, 388, 116, 36);
+		Back.setBorder(null);
+		contentPane.setBorder(null);
+		contentPane.add(Back);
 		
 		
 	}
+	
+	
 }
 
 

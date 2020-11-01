@@ -33,12 +33,13 @@ import java.awt.Cursor;
 public class Start extends JFrame {
 
 	private JPanel contentPane;
+	static Start frame;
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Start frame = new Start();
+					 frame = new Start();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -50,23 +51,26 @@ public class Start extends JFrame {
 	
 //madan@gmail.com
 //madan@123
+	//nishtha@gmail.com
+	//nishtha@123
 	public Start(){
+		
 		setBackground(Color.WHITE);
 		
-		//Image img = Toolkit.getDefaultToolkit().getImage("E:\\ENTERTAINMENT\\picture\\Download\\nature1.jpg");
+		Image img = Toolkit.getDefaultToolkit().getImage("D:\\colleage\\gr1.png");
 		
 //		contentPane=new JPanel(){
 //	         @Override
 //	         public void paintComponent(Graphics g) {
 //	            super.paintComponent(g);
-////	            g.drawImage(img, -50, 0, null);  
+//	            g.drawImage(img, 30, 20, null);  
 //	         }
 //	      };
 		contentPane=new JPanel();
 		contentPane.setBackground(new Color(102, 102, 153));
 		
 
-		    
+		setResizable(false);
 		      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		       setBounds(100, 100, 383, 578);
 		       setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
@@ -84,9 +88,12 @@ public class Start extends JFrame {
 		btnStart.setBounds(101, 271, 140, 34);
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-							Login frame = new Login();
+							Login frame1 = new Login();
 							contentPane.setVisible(false);
-							frame.setVisible(true);
+						    frame.setVisible(false);
+							frame1.setVisible(true);
+						    frame1.controlframe(frame1);
+							
 				
 			}
 		});
