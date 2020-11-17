@@ -25,7 +25,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -33,10 +35,14 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -49,6 +55,10 @@ import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableModel;
+
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+
 import javax.swing.border.EtchedBorder;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -69,13 +79,16 @@ import javax.swing.ImageIcon;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import javax.swing.JSplitPane;
+import javax.swing.JSeparator;
+import java.awt.Window.Type;
 
 public class Login extends JFrame {
 
 
 	private String myclassname,myemail,myclasscode;
 	private JPanel contentPane;
-	
+	private static final String UNDERSCORE= "_";
     //for login
 	private JTextField textFieldEmail;
 	private JTextField textFieldPassword;
@@ -106,6 +119,8 @@ public class Login extends JFrame {
 	int givinggrades=10;
 	
 	int row=0;
+	
+	String mylink="";
 	
 	private JTextField textField;
 	private JTextField textField_1;
@@ -140,12 +155,17 @@ public class Login extends JFrame {
 	Login f;
 	//constructor
 	public Login() {
+		setForeground(Color.DARK_GRAY);
+		setFont(new Font("Dialog", Font.BOLD, 16));
+		setTitle("GLA-ClassRoom");
 		start();
 	}
 
 	public void controlframe(Login f1) {
 		f=f1;
 	}
+	
+	
 //This method start the application and authentication can be done here	
 public void start() {
 
@@ -165,6 +185,7 @@ public void start() {
 		//create panel for showing GUI
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
+		
 		setBounds(100, 100, 383, 578);
 		contentPane = new JPanel();
 	
@@ -186,6 +207,7 @@ public void start() {
 		lblEmail.setForeground(Color.WHITE);
 		lblEmail.setBackground(Color.MAGENTA);
 		lblEmail.setBounds(31, 188, 100, 36);
+		
 		//add email label to panel
 		contentPane.add(lblEmail);
 		
@@ -260,8 +282,8 @@ public void start() {
 		});                                          //login action complete
 		
 		btnLogin.setForeground(Color.WHITE);
-		btnLogin.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		btnLogin.setBackground(new Color(255, 204, 51));
+		btnLogin.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		btnLogin.setBackground(new Color(255, 140, 0));
 		btnLogin.setBounds(212, 388, 116, 36);
 		btnLogin.setBorder(null);
 		//it add button on panel
@@ -286,8 +308,8 @@ public void start() {
 		
 		
 		btnSignup.setForeground(Color.WHITE);
-		btnSignup.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		btnSignup.setBackground(new Color(255, 204, 51));
+		btnSignup.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		btnSignup.setBackground(new Color(255, 140, 0));
 		btnSignup.setBounds(33, 388, 116, 36);
 		btnSignup.setBorder(null);
 		//it add button on panel
@@ -365,6 +387,12 @@ public void start() {
 		lblForgetPassword.setBounds(198, 467, 146, 29);
 		contentPane.add(lblForgetPassword);
 		
+		JLabel lblNewLabel_4 = new JLabel("LogIn Here !");
+		lblNewLabel_4.setForeground(new Color(0, 0, 255));
+		lblNewLabel_4.setFont(new Font("Tahoma", Font.BOLD, 30));
+		lblNewLabel_4.setBounds(93, 53, 204, 54);
+		contentPane.add(lblNewLabel_4);
+		
 		
 		
 		
@@ -376,11 +404,11 @@ public void start() {
 
 //It is called first signup of new account
 public void dashboard(String email){
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	//setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	setMyEmail(email);
 	contentPane = new JPanel();
-	setBounds(100, 100, 383, 578);
-	setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
+	//setBounds(100, 100, 383, 578);
+	//setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
 	contentPane.setForeground(Color.RED);
 
 	contentPane.setBackground(new Color(102, 102, 153));
@@ -417,21 +445,7 @@ public void dashboard(String email){
 	btnCreateClass.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	btnCreateClass.setBounds(90, 219, 191, 32);
 	contentPane.add(btnCreateClass);                             //button create complete
-	
-	//button skip(it is used by teacher and student if both are not interseted to create or join the class at present)
-//	JButton btnSkip = new JButton("Skip");
-//	btnSkip.addActionListener(new ActionListener() {
-//		public void actionPerformed(ActionEvent e) {
-//			contentPane.setVisible(false);
-//			list();
-//			
-//		}
-//	});
-//	btnSkip.setFont(new Font("Tahoma", Font.PLAIN, 14));
-//	btnSkip.setForeground(Color.WHITE);
-//	btnSkip.setBackground(Color.BLACK);
-//	btnSkip.setBounds(90, 333, 191, 32);
-//	contentPane.add(btnSkip);                                  //button skip complete
+
 	
 	JButton btnhome = new JButton("Log out");
 	btnhome.addActionListener(new ActionListener() {
@@ -583,9 +597,7 @@ public void list() {
 	//variable to control arrange of frames
 	j=50;
 	contentPane = new JPanel();
-	setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	setBounds(100, 100, 383, 578);
+
 	contentPane.setForeground(Color.RED);
 	 try {
 		    String sql="select class_code from classinfo where email='"+getMyEmail()+"'";
@@ -599,7 +611,7 @@ public void list() {
 		    }
 		    }
 		    catch(Exception e) {
-		    System.out.println("i ma breakable");	
+		    //System.out.println("i ma breakable");	
 		    }
 	
 	if(check!=0) {
@@ -687,7 +699,7 @@ public void list() {
 		}
 	});
 	menu4.setIconTextGap(8);
-//	menu2.setIcon(new ImageIcon("D:\\Downloads\\pic\\amazone1.jpg"));
+
 	menu4.setForeground(Color.WHITE);
 	menu4.setBackground(new Color(100, 149, 237));
 	menu.add(menu4);
@@ -793,21 +805,7 @@ public void list() {
 	contentPane.add(classname);
 	
 	
-//	JButton btnBack = new JButton("Back");
-//	btnBack.addActionListener(new ActionListener() {
-//		public void actionPerformed(ActionEvent e) {
-//			contentPane.setVisible(false);	
-//			j=40;
-//		dashboard();
-//		
-//			
-//		}
-//	});
-//	btnBack.setFont(new Font("Tahoma", Font.PLAIN, 12));
-//	btnBack.setForeground(new Color(255, 255, 255));
-//	btnBack.setBackground(new Color(0, 0, 0));
-//	btnBack.setBounds(10, 540, 85, 21);
-//	contentPane.add(btnBack);
+
 	
 	
 
@@ -871,10 +869,9 @@ public void classList() {
 
 //This show Assignment List coreesepond to each class
 public void assignList(JButton bt1) {
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	setBounds(100, 100, 383, 578);
+
 	contentPane = new JPanel();
-	setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
+
 	contentPane.setForeground(Color.RED);
 
 	if(mode==1) {
@@ -937,13 +934,13 @@ public void assignList(JButton bt1) {
 					
 					contentPane.setVisible(false);
                       controlpaint=4;
-					//settings();
 					studentlist(bt1);
 					
 				}
 			});
 		view.setForeground(Color.WHITE);
-		view.setBackground(new Color(0, 128, 128));
+		view.setBackground(new Color(0, 102, 51));
+		view.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		view.setBorder(null);
 		menuBar.add(view);
 		
@@ -1025,7 +1022,7 @@ try {
 				asname.setForeground(Color.WHITE);
 				asname.setBackground(Color.BLACK);
 				asname.setBounds(217, 39, 85, 21);
-				internalFrame.add(asname);
+				internalFrame.getContentPane().add(asname);
 				
 
 			
@@ -1034,7 +1031,7 @@ try {
 		
 		
 	}
-	catch(SQLException e1) {
+	catch(Exception e1) {
 		System.out.println("rest step hi");
 	}
 	
@@ -1053,6 +1050,7 @@ try {
 	btnBack.setBackground(new Color(0, 0, 0));
 	btnBack.setForeground(new Color(255, 255, 255));
 	btnBack.setFont(new Font("Tahoma", Font.BOLD, 13));
+	btnBack.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	btnBack.setBounds(15, 500, 106, 32);
 	contentPane.add(btnBack);
 	
@@ -1080,9 +1078,6 @@ try {
 
 //this function tell the student how many student in thier class and he can also remove the student
 public void studentlist(JButton classcd){
-	setBackground(Color.WHITE);
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	setBounds(100, 100, 383, 578);
 	contentPane = new JPanel();
 	contentPane.setToolTipText("");
 	contentPane.setBackground(Color.DARK_GRAY);
@@ -1090,7 +1085,7 @@ public void studentlist(JButton classcd){
 	setContentPane(contentPane);
 	contentPane.setLayout(null);
 	
-	System.out.println(classcd.getText());
+	//System.out.println(classcd.getText());
 	DefaultListModel<String> l1=new DefaultListModel<>();
 	
 	try {
@@ -1130,8 +1125,8 @@ public void studentlist(JButton classcd){
 
 	list.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	list.setForeground(Color.ORANGE);
-
-	list.setBounds(0, 10, 369, 490);
+    list.setBackground(new Color(112, 128, 144));
+	list.setBounds(10, 10, 350, 490);
 	contentPane.add(list);
 	
 	JButton btnRemove = new JButton("Remove");
@@ -1140,8 +1135,6 @@ public void studentlist(JButton classcd){
 		
 			String data="";
 			if(list.getSelectedIndex()!=-1) {
-				//System.out.println(list.getSelectedValue());
-				//System.out.println(list.getSelectedIndex());
 				try {
 					
 					int response=JOptionPane.showInternalConfirmDialog(contentPane, "Do you Want Remove student From Your class");
@@ -1174,17 +1167,42 @@ public void studentlist(JButton classcd){
 		}
 	});
 	btnBack.setBounds(10, 510, 85, 21);
+	btnBack.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	contentPane.add(btnBack);
 	
 	
 	
 }
 
+//link open
+public static void openURL(String url) {
+	String osName = System.getProperty("os.name");
+	//System.out.println(osName);
+	try {
+		if (osName.startsWith("Windows"))
+			Runtime.getRuntime().exec(
+					"rundll32 url.dll,FileProtocolHandler " + url);
+		else {
+			String[] browsers = { "firefox", "opera", "konqueror",
+					"epiphany", "mozilla", "netscape" };
+			String browser = null;
+			for (int count = 0; count < browsers.length && browser == null; count++)
+				if (Runtime.getRuntime().exec(
+						new String[] { "which", browsers[count] })
+						.waitFor() == 0)
+					browser = browsers[count];
+			Runtime.getRuntime().exec(new String[] { browser, url });
+		}
+	} catch (Exception e) {
+		JOptionPane.showMessageDialog(null, "Error in opening browser"
+				+ ":\n" + e.getLocalizedMessage());
+	}
+}
+
 
 //it is used by student to upload their work or too see the see the uploaded the assignment
 public void studentsubmit(JButton assignmentid,JButton classcode){
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	setBounds(100, 100, 383, 578);
+
 	contentPane = new JPanel();
 	contentPane.setBackground(new Color(0, 128, 128));
 	contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -1202,11 +1220,10 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 		}
 	});
 	btnBack.setBounds(10, 10, 85, 21);
+	btnBack.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	contentPane.add(btnBack);
 	
-	JScrollPane scrollPane = new JScrollPane();
-	scrollPane.setBounds(361, 224, -352, -148);
-	contentPane.add(scrollPane);
+	
 	
 	JLabel lblDescription = new JLabel(" Description ");
 	lblDescription.setForeground(new Color(0, 0, 0));
@@ -1214,37 +1231,50 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 	lblDescription.setBounds(10, 41, 97, 21);
 	contentPane.add(lblDescription);
 	
-	JLabel descript = new JLabel("");
-	descript.setFont(new Font("Tahoma", Font.PLAIN, 15));
-	descript.setVerticalAlignment(SwingConstants.TOP);
-	descript.setHorizontalAlignment(SwingConstants.LEFT);
-	descript.setBounds(10, 72, 349, 162);
-	descript.setForeground(new Color(211, 211, 211));
+
+	JEditorPane descript= new JEditorPane();
+	descript.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+	descript.setForeground(Color.WHITE);
+	descript.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	descript.setBackground(Color.GRAY);
+	descript.setBounds(10, 73, 349, 161);
 	contentPane.add(descript);
 	
-	
-	
+	JScrollPane scrollPane_1 = new JScrollPane();
+	scrollPane_1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+	scrollPane_1.setPreferredSize(new Dimension(1, 1));
+	scrollPane_1.setViewportBorder(null);
+	scrollPane_1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+	scrollPane_1.setBounds(10, 73, 349, 161);
+	contentPane.add(scrollPane_1);
+	scrollPane_1.setViewportView((descript));
 	
 	int n=Integer.parseInt(assignmentid.getText());
 	
 	//Description of assignment
 	try
 	{
-		String sql="SELECT assignment_name,file_location from assignmentlist where assignment_id='"+assignmentid.getText()+"'";
+		String sql="SELECT assignment_name,file_location,links from assignmentlist where assignment_id='"+assignmentid.getText()+"'";
 		ResultSet rs=st.executeQuery(sql);
 		String description="";
 		String file="";
+		String links="";
 		while(rs.next()) {
 			description=rs.getString(1);
 			file=rs.getString(2);
+			links=rs.getString(3);
 			
 		}
 		descript.setText(description);
+		descript.setEditable(false);
+		
 		if(!file.equals("")) {
+			
 			JLabel Files = new JLabel(" Files ");
 			Files.setForeground(new Color(0, 0, 0));
+			
 			Files.setFont(new Font("Tahoma", Font.PLAIN, 16));
-			Files.setBounds(10, 268, 110, 26);
+			Files.setBounds(10, 255, 110, 26);
 			contentPane.add(Files);
 			
 			JLabel location = new JLabel(file);
@@ -1254,7 +1284,7 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 				
 					try  
 					{  
-					File file = new File(Files.getText());   
+					File file = new File(location.getText());   
 					if(!Desktop.isDesktopSupported())                            //check if Desktop is supported by Platform or not  
 					{  
 						JOptionPane.showInternalMessageDialog(contentPane, "Not supported Format");
@@ -1276,11 +1306,36 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 					
 				}
 			});
-			
+			location.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			location.setFont(new Font("Tahoma", Font.PLAIN, 15));
 			location.setForeground(new Color(211, 211, 211));
-			location.setBounds(10, 304, 227, 21);
+			location.setBounds(10, 299, 227, 21);
 			contentPane.add(location);
+			
+		
+		}
+		
+		if(!links.equals("")) {
+			JLabel link = new JLabel(" Links ");
+			
+			link.setForeground(new Color(0, 0, 0));
+			link.setFont(new Font("Tahoma", Font.PLAIN, 16));
+			link.setBounds(10, 350, 110, 26);
+			contentPane.add(link);
+			
+			JLabel llocation = new JLabel(links);
+			llocation.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					openURL(llocation.getText().trim());
+				
+				}
+			});
+			llocation.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			llocation.setFont(new Font("Tahoma", Font.PLAIN, 15));
+			llocation.setForeground(new Color(211, 211, 211));
+			llocation.setBounds(10, 390, 227, 21);
+			contentPane.add(llocation);
 			
 		
 		}
@@ -1349,29 +1404,84 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 	//if assignment not uplooaded yet
 	if(controlvar==0)
 	{
+		JLabel lb = new JLabel("None");
+		lb.setBounds(117, 505, 97, 17);
+		contentPane.add(lb);
 		
-	JLabel lb = new JLabel("None");
-	lb.setBounds(117, 505, 97, 17);
-	contentPane.add(lb);
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.setBounds(10, 503, 50, 20);
+		contentPane.add(menuBar);
+
+		menuBar.setBorder(null);
+		menuBar.setBackground(SystemColor.activeCaption);
+		
+		//Create Menu
+		JMenu menu = new JMenu("Upload");
+		menu.setForeground(Color.WHITE);
+		menu.setBackground(new Color(0, 128, 128));
+
+	    menu.setBorder(null);
+	    
+	    
+	    JMenuItem menu1=new JMenuItem("File");
+	    menu1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				JFileChooser j=new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+				
+				int r=j.showOpenDialog(null);
+				if(r==JFileChooser.APPROVE_OPTION) {
+				   lb.setText(j.getSelectedFile().getAbsolutePath());
+						
+				}
+				else {
+					lb.setText("None");
+				}
+			}
+		});
+	    menu1.setIconTextGap(8);
+		menu1.setForeground(Color.WHITE);
+		menu1.setBackground(new Color(100, 149, 237)); 
+		menu.add(menu1);
+		
+		
+		JMenuItem menu4=new JMenuItem("link");
+		menu4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				mylink="";
+				String s=JOptionPane.showInternalInputDialog(contentPane, "Enter Link here!");	
+				try {
+				if(!s.equals("")) {
+					 String text=s;
+					  mylink="";
+						for(int i=0;i<text.length();i++) {
+							if(String.valueOf(text.charAt(i)).equals("\\")){
+								mylink= mylink + "\\\\";
+								System.out.println(text);
+								
+							}
+							else {
+								mylink = mylink + String.valueOf(text.charAt(i));
+							}
+								
+						}
+				}
+			
+				}
+				catch(Exception e2) {
+					
+				}
+			}
+		});
+		menu4.setIconTextGap(8);
+
+		menu4.setForeground(Color.WHITE);
+		menu4.setBackground(new Color(100, 149, 237));
+		menu.add(menu4);
+		menuBar.add(menu);
+		
 	
-	JButton btnUpload = new JButton("Upload");
-	btnUpload.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			
-			JFileChooser j=new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-			
-			int r=j.showOpenDialog(null);
-			if(r==JFileChooser.APPROVE_OPTION) {
-			   lb.setText(j.getSelectedFile().getAbsolutePath());
-				//System.out.println(lb.getText());	
-			}
-			else {
-				lb.setText("Operation is Cancelled");
-			}
-		}
-	});
-	btnUpload.setBounds(10, 503, 85, 21);
-	contentPane.add(btnUpload);
+
 	
 	
 	//System.out.println(n);
@@ -1398,7 +1508,7 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 					}
 					else {
 						
-						//for \slace store in database
+						//for "\"slace store in database
 						 String text=lb.getText();
 						 String text1="";
 							for(int i=0;i<text.length();i++) {
@@ -1412,12 +1522,105 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 								}
 									
 							}
-							
 							//complete logic
+							
+							int confirm=JOptionPane.showInternalConfirmDialog(contentPane, "Do you Want To Submit?");
+							if(confirm==0) {
+								
+							   //submitton date
+								DateFormat dateFormat = new SimpleDateFormat("dd-MM-YYYY");
+						      JFormattedTextField today = new JFormattedTextField(dateFormat);
+						      today.setValue(new Date());
+						      String submitdate=today.getText();
+						      
+						      //
+						      
+						        int subid=0;
+								String mysql="select * from submittionlist order by submittion_id desc limit 1";
+								ResultSet myrs=st.executeQuery(mysql);
+								if(myrs.next()) {
+									subid=Integer.parseInt(myrs.getString("submittionlist_id")) + 1;
+								}
+								
+								
+								
+								  //upload to aws bucket
+//								App ob=new App();
+								
+							
+								File ol=new File(text1);
 									
-			String sql="INSERT INTO submittionlist(Email,File,assignment_id) values('"+getMyEmail()+"','"+text1+"','"+n+"')";
+									//original filename
+									 String new1="";
+									 String mynew="";
+									
+										for(int i=0;i<text1.length();i++) {
+											if(String.valueOf(text1.charAt(i)).equals("\\")){
+												new1= "";
+								
+											}
+											else {
+												new1 = new1 + String.valueOf(text1.charAt(i));
+												
+											}
+												
+										}
+										
+										//ne file name
+										String new2="";
+
+										String pre="";
+										
+										//extract suffix of file
+										for(int i=0;i<new1.length();i++) {
+											if(String.valueOf(new1.charAt(i)).equals(".")){
+												pre= "";
+												
+												
+											}
+											else {
+												pre = pre + String.valueOf(new1.charAt(i));
+											}
+												
+										}
+										
+										//new file name
+										new2 = String.valueOf(n) +"-"+ String.valueOf(subid) + "." + pre;
+										mynew = text1.substring(0,(text1.length()-new1.length()));
+										
+										//new completete path
+										mynew = mynew+new2;
+
+
+										
+										File ne=new File(mynew);
+										
+										if(ol.renameTo(ne)) {
+//upload into s3 bucket
+											
+//											String fileName = folderName + SUFFIX + new2;
+//											s3client.putObject(new PutObjectRequest(bucketName, fileName, 
+//													new File(mynew))
+//													.withCannedAcl(CannedAccessControlList.PublicRead));
+	
+									}
+								
+								//
+						      
+						      
+						      
+						      
+						      
+						      
+									
+			String sql="INSERT INTO submittionlist(Email,File,assignment_id,submit_date,links) values('"+getMyEmail()+"','"+new2+"','"+n+"','"+submitdate+"','"+mylink+"')";
 			st.executeUpdate(sql);
+			
+			if(ne.renameTo(ol)) {
+				
+			}
 			JOptionPane.showInternalMessageDialog(contentPane, "Successfully uploaded");
+							}
 			}
 			}
 			catch(Exception e1){
@@ -1438,10 +1641,10 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 public void submit(JButton assignmentid,JButton classcode) {
 	
 	
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	setBounds(100, 100, 383, 578);
+//	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//	setBounds(100, 100, 383, 578);
 	contentPane = new JPanel();
-	setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
+	//setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
 	contentPane.setForeground(Color.RED);
 
 	if(mode==1) {
@@ -1597,11 +1800,11 @@ public void submit(JButton assignmentid,JButton classcode) {
 //This method shows profile
 public void profile() {
 
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	setBounds(100, 100, 383, 578);
+//	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//	setBounds(100, 100, 383, 578);
 	contentPane = new JPanel();
 	contentPane.setBackground(Color.DARK_GRAY);
-	setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
+	//setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
 	contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 	setContentPane(contentPane);
 	contentPane.setLayout(null);
@@ -1741,12 +1944,10 @@ public void profile() {
 
 //This method create the assignment to upload the assignment (Student)
 public void CreateAssignment(String class_code) {
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	setBounds(100, 100, 383, 578);
+
 	contentPane = new JPanel();
 	contentPane.setForeground(Color.RED);
-	setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
-	contentPane.setBackground(SystemColor.textInactiveText);
+		contentPane.setBackground(SystemColor.textInactiveText);
 	setContentPane(contentPane);
 	contentPane.setLayout(null);
 	
@@ -1773,6 +1974,17 @@ public void CreateAssignment(String class_code) {
 	contentPane.add(textField);
 	textField.setColumns(10);
 	
+	JTextField linktext = new JTextField();
+	linktext.setColumns(10);
+	linktext.setBounds(128, 156, 201, 24);
+	contentPane.add(linktext);
+	
+	JLabel links = new JLabel("Links :");
+	links.setForeground(new Color(72, 61, 139));
+	links.setFont(new Font("Tahoma", Font.BOLD, 16));
+	links.setBounds(34, 163, 93, 24);
+	contentPane.add(links);
+	
 	 //dihkhdhk
 	
 	JLabel	lb=new JLabel("None file selected");
@@ -1792,7 +2004,7 @@ public void CreateAssignment(String class_code) {
 			int r=j.showOpenDialog(null);
 			if(r==JFileChooser.APPROVE_OPTION) {
 				lb.setText(j.getSelectedFile().getAbsolutePath());
-				//System.out.println(lb.getText());
+				
 				
 				
 			}
@@ -1824,11 +2036,12 @@ JButton btnDone = new JButton("Done");
 					
 					//for \slace store in database
 					 String text=lb.getText();
-					 String text1="";
+					 String text1="",link="";
+					 String link12=linktext.getText();
 						for(int i=0;i<text.length();i++) {
 							if(String.valueOf(text.charAt(i)).equals("\\")){
 								text1= text1 + "\\\\";
-								System.out.println(text);
+								//System.out.println(text);
 								
 							}
 							else {
@@ -1837,19 +2050,114 @@ JButton btnDone = new JButton("Done");
 								
 						}
 						
-						//complete logic
+						for(int i=0;i<link12.length();i++) {
+							if(String.valueOf(link12.charAt(i)).equals("\\")){
+								link= link + "\\\\";
+								//System.out.println(text);
+								
+							}
+							else {
+								link = link + String.valueOf(link12.charAt(i));
+							}
+								
+						}
+						
+						int valid=0;
+						String checkdateformate=textField_1.getText();
+							if(checkdateformate.charAt(2)=='-' && checkdateformate.charAt(5)=='-' && checkdateformate.length()==10) {
+								valid=1;
+								
+								
+						}
+							int resp=JOptionPane.showInternalConfirmDialog(contentPane, "Do you Want to submit!");
+							if(valid==1 && resp==0) {
+								
+								int myassignid=0;
+								String mysql="select * from assignmentlist order by assignment_id desc limit 1";
+								ResultSet myrs=st.executeQuery(mysql);
+								if(myrs.next()) {
+									myassignid=Integer.parseInt(myrs.getString("assignment_id")) +1;
+								}	
+								
+								
+						   //upload to aws bucket
+//								App ob=new App();
+								
+							
+								File ol=new File(text1);
+									
+									//original filename
+									 String new1="";
+									 String mynew="";
+									
+										for(int i=0;i<text1.length();i++) {
+											if(String.valueOf(text1.charAt(i)).equals("\\")){
+												new1= "";
+								
+											}
+											else {
+												new1 = new1 + String.valueOf(text1.charAt(i));
+												
+											}
+												
+										}
+										
+										//ne file name
+										String new2="";
+										String asid="asid";
+										String pre="";
+										
+										//extract suffix of file
+										for(int i=0;i<new1.length();i++) {
+											if(String.valueOf(new1.charAt(i)).equals(".")){
+												pre= "";
+												
+												
+											}
+											else {
+												pre = pre + String.valueOf(new1.charAt(i));
+											}
+												
+										}
+										
+										//new file name
+										new2 = asid + String.valueOf(myassignid) + "." + pre;
+										mynew = text1.substring(0,(text1.length()-new1.length()));
+										
+										//new completete path
+										mynew = mynew+new2;
 
-					
-				String sql1="insert into assignmentlist(CLASS_NAME,CLASS_CODE,ASSIGNMENT_NAME,DUE_DATE,FILE_LOCATION) values('"+ class_name+"','"+  class_code +"','"+textField.getText()+"','"+textField_1.getText()+"','"+text1+"')";
+
+										
+										File ne=new File(mynew);
+										
+										if(ol.renameTo(ne)) {
+//upload into s3 bucket
+											
+//											String fileName = folderName + SUFFIX + new2;
+//											s3client.putObject(new PutObjectRequest(bucketName, fileName, 
+//													new File(mynew))
+//													.withCannedAcl(CannedAccessControlList.PublicRead));
+	
+									}
+
+						//complete logic	
+				String sql1="insert into assignmentlist(CLASS_NAME,CLASS_CODE,ASSIGNMENT_NAME,DUE_DATE,FILE_LOCATION,LINKS) values('"+ class_name+"','"+  class_code +"','"+textField.getText()+"','"+textField_1.getText()+"','"+new2+"','"+link+"')";
 				st.executeUpdate(sql1);
+				
+				if(ne.renameTo(ol)) {
+
+					///again rename;
+				}
 				
 				JOptionPane.showInternalMessageDialog(contentPane,"Successfully assignment uploaded!");
 				contentPane.setVisible(false);
 				list();
+							}
 			}
 			}
 			catch(Exception e1) {
-				//System.out.println(e1);
+				System.out.println(e1);
 			}
 			
 
@@ -1906,30 +2214,14 @@ JButton btnDone = new JButton("Done");
 	btnNewButton_1.setBounds(34, 347, 110, 21);
 	contentPane.add(btnNewButton_1);
 	
-//	JButton btnNewButton_1;
-//	btnNewButton_1 = new JButton("save");
-//	btnNewButton_1.addActionListener(new ActionListener() {
-//		public void actionPerformed(ActionEvent e) {
-//			JFileChooser j=new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());	
-//			int r=j.showOpenDialog(null);
-//			if(r==JFileChooser.APPROVE_OPTION) {
-//				lb.setBounds(138, 345, 210, 19);
-//				lb.setText(j.getSelectedFile().getAbsolutePath());
-//			}
-//			else {
-//				lb.setText("operation is cancelled");
-//			}
-//		}
-//	});
-//	btnNewButton_1.setBounds(34, 347, 85, 21);
-//	contentPane.add(btnNewButton_1);
+
 		
 }
 
 //it used to change the setting like theme of application
 public void settings() {
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	setBounds(100, 100, 383, 578);
+//	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//	setBounds(100, 100, 383, 578);
 	contentPane = new JPanel();
 	contentPane.setForeground(Color.GRAY);
 	
@@ -2132,7 +2424,6 @@ public void remove(String s) {
 		//System.out.println(e);
 	}
 }
-
 }
 
 

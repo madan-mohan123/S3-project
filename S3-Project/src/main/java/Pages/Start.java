@@ -41,6 +41,7 @@ public class Start extends JFrame {
 				try {
 					 frame = new Start();
 					frame.setVisible(true);
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -49,23 +50,20 @@ public class Start extends JFrame {
 	}
 	
 	
-//madan@gmail.com
-//madan@123
-	//nishtha@gmail.com
+       //madan@gmail.com
+      //madan@123
+	 //nishtha@gmail.com
 	//nishtha@123
 	public Start(){
+		setForeground(Color.DARK_GRAY);
+		setFont(new Font("Dialog", Font.BOLD, 14));
+		setTitle("GLA-ClassRoom");
+		
 		
 		setBackground(Color.WHITE);
 		
 		Image img = Toolkit.getDefaultToolkit().getImage("D:\\colleage\\gr1.png");
-		
-//		contentPane=new JPanel(){
-//	         @Override
-//	         public void paintComponent(Graphics g) {
-//	            super.paintComponent(g);
-//	            g.drawImage(img, 30, 20, null);  
-//	         }
-//	      };
+
 		contentPane=new JPanel();
 		contentPane.setBackground(new Color(102, 102, 153));
 		
@@ -77,7 +75,7 @@ public class Start extends JFrame {
 		        contentPane.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Welcome", TitledBorder.CENTER, TitledBorder.TOP, null, Color.ORANGE));
 				setContentPane(contentPane);
 				contentPane.setLayout(null);
-	
+				
 		
 		//create Start button
 		JButton btnStart = new JButton("START.");
@@ -105,21 +103,9 @@ public class Start extends JFrame {
 		contentPane.setBorder(null);
 		contentPane.add(btnStart);
 	}
+
+
+
 	
-	
-//	public void paint(Graphics gp) {
-//		super.paint(gp);
-//		Graphics2D graphics=(Graphics2D) gp;
-//		
-//		
-//		graphics.setColor(Color.DARK_GRAY);
-//		
-//		Stroke s=new BasicStroke(3f);
-//		
-//		graphics.setStroke(s);
-//		Line2D line=new Line2D.Float(0.0f,70.00f,383.00f,70.00f);
-//		graphics.draw(line);
-//		
-//		
-//	}
+
 }

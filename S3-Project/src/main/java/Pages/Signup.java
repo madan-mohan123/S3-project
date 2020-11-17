@@ -38,26 +38,11 @@ public class Signup  {
 	private JTextField textFieldName;
 	private JTextField textFieldEmail;
 	private JTextField textFieldPassword;
+	private JTextField refield;
 	private Connection cn;
 	private Statement st;
 	
-	
-//	public static void main(String[] args) {
-//		EventQueue.invokeLater(new Runnable() {
-//			public void run() {
-//				try {
-//					 frame = new Signup();
-//					frame.setVisible(true);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//	}
 
-	/**
-	 * Create the frame.
-	 */
 	public JFrame f;
 	public Signup() {
 		 f=new JFrame();
@@ -83,6 +68,8 @@ public class Signup  {
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setBounds(100, 100, 383, 578);
 		f.setResizable(false);
+		f.setFont(new Font("Dialog", Font.BOLD, 14));
+		f.setTitle("GLA-ClassRoom");
 		contentPane = new JPanel();
 		contentPane.setForeground(Color.RED);
 		contentPane.setBackground(Color.DARK_GRAY);
@@ -101,7 +88,7 @@ public class Signup  {
 		
 		//create Textfield userame
 		textFieldName = new JTextField();
-		textFieldName.setBounds(134, 151, 202, 29);
+		textFieldName.setBounds(145, 151, 202, 29);
 		contentPane.add(textFieldName);
 		textFieldName.setBorder(null);
 		textFieldName.setColumns(10);
@@ -117,7 +104,7 @@ public class Signup  {
 		
 		//create Textfield email
 		textFieldEmail = new JTextField();
-		textFieldEmail .setBounds(134, 205, 202, 29);
+		textFieldEmail .setBounds(145, 205, 202, 29);
 		contentPane.add(textFieldEmail );
 		textFieldEmail.setBorder(null);
 		textFieldEmail .setColumns(10);
@@ -131,9 +118,26 @@ public class Signup  {
 		
 		//create Textfield Password
 		textFieldPassword = new JPasswordField();
-		textFieldPassword.setBounds(134, 254, 202, 29);
+		textFieldPassword.setBounds(145, 254, 202, 29);
 		contentPane.add(textFieldPassword);
 		textFieldPassword.setColumns(10);
+		textFieldPassword.setBorder(null);
+		
+		
+		
+		
+		JLabel ReTypePassword = new JLabel("RePassword :");
+		//ReTypePassword.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		ReTypePassword.setForeground(Color.WHITE);
+		ReTypePassword.setFont(new Font("Segoe UI", Font.BOLD, 17));
+		ReTypePassword.setBounds(31, 308, 110, 42);
+		contentPane.add(ReTypePassword);
+		
+		refield = new JPasswordField();
+		refield.setBounds(145, 308, 202, 29);
+		contentPane.add(refield);
+		refield.setColumns(10);
+		refield.setBorder(null);
 		
 			//create button
 		
@@ -141,7 +145,7 @@ public class Signup  {
 		btnClickHere.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//code for action happen
-				if(textFieldName.getText().contentEquals("") || textFieldEmail.getText().contentEquals("") || textFieldPassword.getText().contentEquals("")) {
+				if(textFieldName.getText().contentEquals("") || textFieldEmail.getText().contentEquals("") || textFieldPassword.getText().contentEquals("") || refield.getText().contentEquals("")) {
 					JOptionPane.showMessageDialog(contentPane, "All fields are required");
 				}
 				
@@ -150,7 +154,9 @@ public class Signup  {
 					 //Valid Email
 					 String validId=textFieldEmail.getText();
 					 int length=validId.length();
-					 if(length>10 && (validId.substring(length-10, length).equals("@gmail.com")) || (validId.substring(length-10, length).equals("@yahoo.com"))) {
+					 
+					 if(length>10) {
+						 if( (validId.substring(length-10, length).equals("@gmail.com")) || (validId.substring(length-10, length).equals("@yahoo.com"))) {				 
 				 try {     
 					 
 					
@@ -167,7 +173,7 @@ public class Signup  {
 							JOptionPane.showInternalMessageDialog(contentPane,"All ready have account");
 							}
 							else {
-						
+								if(textFieldPassword.getText().equals(refield.getText())) {						
 						String sql1="insert into account(USERNAME,EMAIL,PASSWORD) values('"+ textFieldName.getText() +"','"+ textFieldEmail.getText() +"','"+textFieldPassword.getText()+"')";
 						st.executeUpdate(sql1);
 						JOptionPane.showInternalMessageDialog(contentPane,"Successfully created!");
@@ -177,13 +183,21 @@ public class Signup  {
 						frame1.setVisible(true);
 					    frame1.controlframe(frame1);
 					    frame1.dashboard(textFieldEmail.getText());
-						
+								}
+								else {
+									JOptionPane.showInternalMessageDialog(contentPane,"Paasword Mismatch!");
+								}
 							
 					}
+							
 				 }
 					catch(SQLException e1) {
 						System.out.println("rest step");
 					}
+					 }
+						 else {
+							 JOptionPane.showInternalMessageDialog(contentPane,"Invalid Email"); 
+						 }
 					 }
 					 else {
 						 JOptionPane.showInternalMessageDialog(contentPane,"Invalid Email"); 
@@ -197,7 +211,8 @@ public class Signup  {
 		
 		btnClickHere.setForeground(Color.BLACK);
 		btnClickHere.setFont(new Font("Tahoma", Font.BOLD, 14));
-		btnClickHere.setBackground(Color.ORANGE);
+		btnClickHere.setBackground(new Color(255, 140, 0));
+		//btnClickHere.setBackground(Color.ORANGE);
 		btnClickHere.setBounds(212, 388, 116, 36);
 		contentPane.setBorder(null);
 		contentPane.add(btnClickHere);
@@ -220,12 +235,19 @@ public class Signup  {
 			
 		Back.setForeground(Color.BLACK);
 		Back.setFont(new Font("Tahoma", Font.BOLD, 14));
-		Back.setBackground(Color.ORANGE);
+		Back.setBackground(new Color(255, 140, 0));
+		//Back.setBackground(Color.ORANGE);
 		Back.setBounds(33, 388, 116, 36);
 		Back.setBorder(null);
 		contentPane.setBorder(null);
 		contentPane.add(Back);
 		
+		JLabel lblNewLabel_4 = new JLabel("SignUp!");
+		lblNewLabel_4.setForeground(new Color(72, 61, 139));
+		//lblNewLabel_4.setForeground(new Color(0, 0, 255));
+		lblNewLabel_4.setFont(new Font("Tahoma", Font.BOLD, 30));
+		lblNewLabel_4.setBounds(120, 53, 204, 54);
+		contentPane.add(lblNewLabel_4);
 		
 	}
 	
