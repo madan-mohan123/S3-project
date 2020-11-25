@@ -26,11 +26,11 @@ public class App {
 	private static final String UNDERSCORE= "_";
 	
 //		AWSCredentials credentials = new BasicAWSCredentials(
-//				"", 
-//				"");
+//				"access key", 
+//				"secret key");
 		
 //		AmazonS3 s3client = new AmazonS3Client(credentials);
-//		AmazonS3 s3client= AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_2).build();
+	//AmazonS3 s3client= AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_2).build();
 	// create bucket - name must be unique for all S3 users
 //		String bucketName = "mohan-876950-a";
 //		s3client.createBucket(bucketName);

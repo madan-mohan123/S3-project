@@ -56,6 +56,13 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableModel;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
@@ -165,6 +172,16 @@ public class Login extends JFrame {
 		f=f1;
 	}
 	
+//aws	
+	///accesss key,secret key
+AWSCredentials credentials = new BasicAWSCredentials(
+			"AKIA53PPZWO44DTC63VW", 
+			"5VMxy+3KBe7erSQ4bWMlBKAiIcFcT2VgVhZwFxPl");   
+
+AmazonS3 s3client= AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_2).build();
+
+private static final String SUFFIX = "/";
+
 	
 //This method start the application and authentication can be done here	
 public void start() {
@@ -945,6 +962,15 @@ public void assignList(JButton bt1) {
 		menuBar.add(view);
 		
 	}
+	else {
+		   JLabel Status = new JLabel("MYASSIGNMENTS");
+			Status.setForeground(Color.WHITE);
+			Status.setBackground(new Color(135, 206, 235));
+			Status.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			
+			Status.setBounds(20, 20, 120, 17);
+			contentPane.add(Status);
+	}
 	
 	JInternalFrame internalFrame;		
 
@@ -958,6 +984,8 @@ try {
 		String duedate="";
 		String assignmentid="";
 		
+		
+		       
 		
 		while(rs.next()) {
 			    assign=rs.getString(1);
@@ -1282,27 +1310,11 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 				@Override
 				public void mouseClicked(MouseEvent e) {
 				
-					try  
-					{  
-					File file = new File(location.getText());   
-					if(!Desktop.isDesktopSupported())                            //check if Desktop is supported by Platform or not  
-					{  
-						JOptionPane.showInternalMessageDialog(contentPane, "Not supported Format");
-					 
-					}  
-					Desktop desktop = Desktop.getDesktop();  
-					if(file.exists()) {                                               //checks file exists or not  
-					desktop.open(file);                                              //opens the specified file  
-					}
-					else {
-						JOptionPane.showInternalMessageDialog(contentPane, "File not Exist");
-					}
-					}
-				
-					catch(Exception e1)  
-					{  
-					//e1.printStackTrace();  
-					}
+					
+					String awsfilespath="https://assignmentmanagement.s3.us-east-2.amazonaws.com/Section-A/" + location.getText();
+					
+					openURL(awsfilespath.trim());
+
 					
 				}
 			});
@@ -1365,15 +1377,19 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 	   
 			try {
 				
-				String sql2="SELECT status,grades from submittionlist where assignment_id='"+n+"' and email='"+getMyEmail()+"'";
+				String sql2="SELECT status,grades,submit_date,file from submittionlist where assignment_id='"+n+"' and email='"+getMyEmail()+"'";
 				String gr="0/0";
 			
 				ResultSet rs1=st.executeQuery(sql2);
+				String dateofsubmittion="";
+				String myfilelink="";
 				while(rs1.next()){
 					if(rs1.getString(1).contentEquals("Checked")) {
 						
 						gr=rs1.getString(2);
 					}	
+					dateofsubmittion=rs1.getString(3);
+					myfilelink=rs1.getString(4);
 				}
 				
 		JLabel grades = new JLabel("Grades: "+gr);
@@ -1383,15 +1399,62 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 		grades.setBounds(10, 503, 85, 21);
 		contentPane.add(grades);
 		
-		JLabel Status = new JLabel("Submitted");
+		String sql="SELECT Due_date from assignmentlist where assignment_id='"+n+"'";
+		String duedate="";
+	
+		ResultSet rs12=st.executeQuery(sql);
+	
+		while(rs12.next()){
+			duedate=rs12.getString(1);	
+		}
+		
+		String d1=dateofsubmittion;
+		String d2=duedate;
+		
+		int d1year=Integer.parseInt(d1.substring(0, 4));
+		int d1mon=Integer.parseInt(d1.substring(5, 7));
+		int d1day=Integer.parseInt(d1.substring(8, 10));
+		
+		//due
+		int d2year=Integer.parseInt(d2.substring(0, 4));
+		int d2mon=Integer.parseInt(d2.substring(5, 7));
+		int d2day=Integer.parseInt(d2.substring(8, 10));
+		
+		int cal=(d2year-d1year)*365 + (d2mon * 30 + d2day) - (d1mon * 30 + d1day);
+		
+		JLabel Status;
+		if(cal>=0) {
+			Status = new JLabel("Submitted");
+		}
+		else {
+			Status = new JLabel("Latesubmit");
+		}
+		
+		//JLabel Status = new JLabel("Submitted");
 		Status.setForeground(Color.WHITE);
 		Status.setBackground(new Color(135, 206, 235));
 		Status.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		
-		Status.setBounds(259, 498, 66, 26);
+		Status.setBounds(259, 498, 78, 26);
 		contentPane.add(Status);
-		//System.out.println("hi");
+		
+		
+		JLabel filelb = new JLabel(myfilelink);
+		filelb.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String awsfilespath="https://assignmentmanagement.s3.us-east-2.amazonaws.com/Section-A/" + filelb.getText();
+				openURL(awsfilespath.trim());
+
+				
 			}
+		});
+		filelb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		filelb.setBounds(117, 505, 97, 17);
+		contentPane.add(filelb);
+			}
+			
+			
           catch(Exception e1) {
 				
 			}
@@ -1514,7 +1577,7 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 							for(int i=0;i<text.length();i++) {
 								if(String.valueOf(text.charAt(i)).equals("\\")){
 									text1= text1 + "\\\\";
-									System.out.println(text);
+//									System.out.println(text);
 									
 								}
 								else {
@@ -1528,7 +1591,8 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 							if(confirm==0) {
 								
 							   //submitton date
-								DateFormat dateFormat = new SimpleDateFormat("dd-MM-YYYY");
+
+							  DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
 						      JFormattedTextField today = new JFormattedTextField(dateFormat);
 						      today.setValue(new Date());
 						      String submitdate=today.getText();
@@ -1536,16 +1600,13 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 						      //
 						      
 						        int subid=0;
-								String mysql="select * from submittionlist order by submittion_id desc limit 1";
+								String mysql="select * from submittionlist order by submit_id desc limit 1";
 								ResultSet myrs=st.executeQuery(mysql);
 								if(myrs.next()) {
-									subid=Integer.parseInt(myrs.getString("submittionlist_id")) + 1;
+									subid=Integer.parseInt(myrs.getString("submit_id")) + 1;
 								}
 								
-								
-								
-								  //upload to aws bucket
-//								App ob=new App();
+
 								
 							
 								File ol=new File(text1);
@@ -1596,23 +1657,20 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 										File ne=new File(mynew);
 										
 										if(ol.renameTo(ne)) {
-//upload into s3 bucket
-											
-//											String fileName = folderName + SUFFIX + new2;
-//											s3client.putObject(new PutObjectRequest(bucketName, fileName, 
-//													new File(mynew))
-//													.withCannedAcl(CannedAccessControlList.PublicRead));
-	
+//upload into s3 bucketString 
+											String bucketName =  "assignmentmanagement";
+											String folderName = "Section-A";
+											String fileName = folderName + SUFFIX + new2;
+											s3client.putObject(new PutObjectRequest(bucketName, fileName, 
+													new File(mynew))
+													.withCannedAcl(CannedAccessControlList.PublicRead));
+//	
 									}
 								
 								//
 						      
 						      
-						      
-						      
-						      
-						      
-									
+						      						
 			String sql="INSERT INTO submittionlist(Email,File,assignment_id,submit_date,links) values('"+getMyEmail()+"','"+new2+"','"+n+"','"+submitdate+"','"+mylink+"')";
 			st.executeUpdate(sql);
 			
@@ -1640,11 +1698,8 @@ public void studentsubmit(JButton assignmentid,JButton classcode){
 //it used by teacher to giving the grades and view assignment of students
 public void submit(JButton assignmentid,JButton classcode) {
 	
-	
-//	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//	setBounds(100, 100, 383, 578);
+
 	contentPane = new JPanel();
-	//setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\downloads\\pic\\maths.png"));
 	contentPane.setForeground(Color.RED);
 
 	if(mode==1) {
@@ -1666,14 +1721,14 @@ public void submit(JButton assignmentid,JButton classcode) {
 	
 	
 	JTable table;
-	String[][] s=new String[30][2];
-	String[] s1={"Email","Grades"};
+	String[][] s=new String[30][3];
+	String[] s1={"Email","Grades","Links"};
 	
 	int n=Integer.parseInt(assignmentid.getText());
 	
 	row=0;
 	try {
-		String sql="select Email,grades from submittionlist where assignment_id='"+n+"'";
+		String sql="select Email,grades,links from submittionlist where assignment_id='"+n+"'";
 		
 		ResultSet rs=st.executeQuery(sql);
 		
@@ -1681,7 +1736,8 @@ public void submit(JButton assignmentid,JButton classcode) {
 
 			s[row][0]=rs.getString(1);              //email
 			s[row][1]=rs.getString(2);             //grades
-			//System.out.println(s[row][0]);
+			s[row][2]=rs.getString(3);                  //links
+			
 			row++;
 			}
 		}
@@ -1701,6 +1757,7 @@ public void submit(JButton assignmentid,JButton classcode) {
 	scrollPane.setViewportView(table);
 	
 	
+	
 	//Give grades
 	
 	grades=new String[row];
@@ -1709,8 +1766,7 @@ public void submit(JButton assignmentid,JButton classcode) {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 
-			//System.out.println(table.getValueAt(table.getSelectedRow(), table.getSelectedColumn()));
-
+			
 			for(int i=0;i<row;i++) {
 				grades[i]=(String)table.getValueAt(i,1);
 				}
@@ -1721,7 +1777,7 @@ public void submit(JButton assignmentid,JButton classcode) {
 	JButton done = new JButton("Done");
 	done.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			JOptionPane.showInternalMessageDialog(contentPane, "Click on any cell to giving these grades!");
+			
 			for(int i=0;i<row;i++) {
 				try {
 					String sql="UPDATE submittionlist SET grades='"+grades[i]+"' , status='Checked' where assignment_id='"+assignmentid.getText()+"' and email='"+(String)table.getValueAt(i,0)+"'";
@@ -1750,28 +1806,13 @@ public void submit(JButton assignmentid,JButton classcode) {
 				while(rs.next()) {
 					int pane=JOptionPane.showInternalConfirmDialog(contentPane, "Do you want open it?");
 					if(pane==0) {
-						try  
-						{  
-						File file = new File(rs.getString(1));   
-						if(!Desktop.isDesktopSupported())                                                //check if Desktop is supported by Platform or not  
-						{  
-							JOptionPane.showInternalMessageDialog(contentPane, "Not supported Format");
-						 
-						}  
-						Desktop desktop = Desktop.getDesktop();  
-						if(file.exists()) {                                                            //checks file exists or not  
-						desktop.open(file);                                                           //opens the specified file  
-						}
-						else {
-						JOptionPane.showInternalMessageDialog(contentPane, "File not Exist");
-						}
-						}  
-						catch(Exception e1)  
-						{  
 						
-						}
+						String awsfilespath="https://assignmentmanagement.s3.us-east-2.amazonaws.com/Section-A/" + rs.getString(1);
+						openURL(awsfilespath.trim());
+						
+
 					}
-					//System.out.println(rs.getString(1));
+					
 				}
 			}
 			catch(Exception e1) {
@@ -1782,6 +1823,32 @@ public void submit(JButton assignmentid,JButton classcode) {
 	});
 	btnView.setBounds(141, 510, 85, 21);
 	contentPane.add(btnView);
+	
+	//view link
+	try {
+	table.addMouseListener(new MouseAdapter() {
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			int row=table.getSelectedRow();
+			int col=table.getSelectedColumn();
+			if(col==2) {
+				try {
+				String filelink=(String) table.getValueAt(row,col);	
+				if(!filelink.equals("")) {
+					
+					openURL(filelink.trim());
+				}
+				}
+				catch (Exception ew) {	
+				}
+			}
+		}
+	});
+	}
+	catch (Exception e) {
+		
+	}
+	
 	
 	JButton btnCancel = new JButton("Back");
 	btnCancel.addActionListener(new ActionListener() {
@@ -1957,7 +2024,7 @@ public void CreateAssignment(String class_code) {
 	lblduedate.setBounds(34, 244, 93, 19);
 	contentPane.add(lblduedate);
 	
-	textField_1 = new JTextField();
+	textField_1 = new JTextField("yyyy-mm-dd");
 	textField_1.setBounds(128, 244, 201, 24);
 	contentPane.add(textField_1);
 	textField_1.setColumns(10);
@@ -2064,7 +2131,7 @@ JButton btnDone = new JButton("Done");
 						
 						int valid=0;
 						String checkdateformate=textField_1.getText();
-							if(checkdateformate.charAt(2)=='-' && checkdateformate.charAt(5)=='-' && checkdateformate.length()==10) {
+							if(checkdateformate.charAt(4)=='-' && checkdateformate.charAt(7)=='-' && checkdateformate.length()==10) {
 								valid=1;
 								
 								
@@ -2077,7 +2144,8 @@ JButton btnDone = new JButton("Done");
 								ResultSet myrs=st.executeQuery(mysql);
 								if(myrs.next()) {
 									myassignid=Integer.parseInt(myrs.getString("assignment_id")) +1;
-								}	
+								}
+								//System.out.println(myassignid+" ID");
 								
 								
 						   //upload to aws bucket
@@ -2132,12 +2200,14 @@ JButton btnDone = new JButton("Done");
 										File ne=new File(mynew);
 										
 										if(ol.renameTo(ne)) {
+										//	System.out.println(new2+" "+mynew);
 //upload into s3 bucket
-											
-//											String fileName = folderName + SUFFIX + new2;
-//											s3client.putObject(new PutObjectRequest(bucketName, fileName, 
-//													new File(mynew))
-//													.withCannedAcl(CannedAccessControlList.PublicRead));
+											String bucketName = "assignmentmanagement";
+											String folderName = "Section-A";
+											String fileName = folderName + SUFFIX + new2;
+											s3client.putObject(new PutObjectRequest(bucketName, fileName, 
+													new File(mynew))
+													.withCannedAcl(CannedAccessControlList.PublicRead));
 	
 									}
 
@@ -2153,6 +2223,9 @@ JButton btnDone = new JButton("Done");
 				JOptionPane.showInternalMessageDialog(contentPane,"Successfully assignment uploaded!");
 				contentPane.setVisible(false);
 				list();
+							}
+							else {
+								System.out.println("hi");
 							}
 			}
 			}
