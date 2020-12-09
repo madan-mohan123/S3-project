@@ -175,8 +175,8 @@ public class Login extends JFrame {
 //aws	
 	///accesss key,secret key
 AWSCredentials credentials = new BasicAWSCredentials(
-			"AKIA53PPZWO44DTC63VW", 
-			"5VMxy+3KBe7erSQ4bWMlBKAiIcFcT2VgVhZwFxPl");   
+			"", 
+			"");   
 
 AmazonS3 s3client= AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_2).build();
 
