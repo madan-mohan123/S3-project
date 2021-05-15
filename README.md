@@ -4,7 +4,7 @@
 <h2 align="center"> GROUP No: 5 </h2>
 
 
-<div><video src="https://user-images.githubusercontent.com/61196580/118355084-d3987e00-b58b-11eb-82db-247069c5c42d.mp4"> <video> </div>
+<div><video src="https://user-images.githubusercontent.com/61196580/118355084-d3987e00-b58b-11eb-82db-247069c5c42d.mp4" autoplay > <video> </div>
 
 
 ## Project Group Members :
