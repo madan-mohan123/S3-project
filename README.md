@@ -1,10 +1,10 @@
 
-<h2>PROJECT TOPIC: ASSIGNMENT SYSTEM USING CLOUD</h2>
-<p> <img src ="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" > </p>
-<h2> GROUP No: 5 </h2>
+<h2 align="center">PROJECT TOPIC: ASSIGNMENT SYSTEM USING CLOUD</h2>
+<p align="center"> <img src ="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" > </p>
+<h2 align="center"> GROUP No: 5 </h2>
 
 
-https://user-images.githubusercontent.com/61196580/118355084-d3987e00-b58b-11eb-82db-247069c5c42d.mp4
+<div><video src="https://user-images.githubusercontent.com/61196580/118355084-d3987e00-b58b-11eb-82db-247069c5c42d.mp4"> <video> </div>
 
 
 ## Project Group Members :
