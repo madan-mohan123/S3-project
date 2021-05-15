@@ -1,7 +1,11 @@
 
 <h2>PROJECT TOPIC: ASSIGNMENT SYSTEM USING CLOUD</h2>
-<p> <img src ="" > </p>
+<p> <img src ="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" > </p>
 <h2> GROUP No: 5 </h2>
+
+
+https://user-images.githubusercontent.com/61196580/118355084-d3987e00-b58b-11eb-82db-247069c5c42d.mp4
+
 
 ## Project Group Members :
 1. Mohan Agrawal ( 18/181500385 )                                           
